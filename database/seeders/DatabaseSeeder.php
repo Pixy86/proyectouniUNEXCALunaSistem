@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\Item;
 use App\Models\Inventory;
+use App\Models\Customer;
+use App\Models\Vehicle;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -21,7 +23,9 @@ class DatabaseSeeder extends Seeder
          //   'name' => 'Test User',
         // 'email' => 'test@example.com',
         //]);
-        // Item::factory(10)->create();
         Inventory::factory(10)->create();
+        Customer::factory(10)
+            ->hasVehicles(2)
+            ->create();
     }
 }

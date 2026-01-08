@@ -32,7 +32,8 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
                     ->searchable()
                     ->sortable(),
                 TextColumn::make(name: 'quantity')
-                    ->sortable(),
+                    ->sortable()
+                    ->badge(),
                 TextColumn::make(name: 'description')
                     ->searchable()
                     ->sortable(),

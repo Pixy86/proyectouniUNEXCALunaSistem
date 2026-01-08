@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customers', function (Blueprint $table) {
+        Schema::create('vehicles', function (Blueprint $table) {
             $table->id();
-            $table->string('cedula_rif')->unique();
-            $table->string('nombre');  
-            $table->string('apellido');
-            $table->string('telefono');   
-            $table->string('telefono_secundario')->nullable();
-            $table->string('email')->unique()->nullable();
-            $table->text('direccion')->nullable();
+            $table->unsignedBigInteger('customer_id');
+            $table->foreign('customer_id')->references('id')->on('customers')->cascadeOnDelete();
+            $table->string('placa')->unique();
+            $table->string('marca');
+            $table->string('modelo');
+            $table->string('color')->nullable();
+            $table->string('tipo_vehiculo')->nullable();
             $table->boolean('estado')->default(true);
             $table->softDeletes();
             $table->timestamps();
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('customers');
+        Schema::dropIfExists('vehicles');
     }
 };
