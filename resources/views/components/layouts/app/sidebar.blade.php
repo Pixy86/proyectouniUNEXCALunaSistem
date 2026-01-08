@@ -2,7 +2,14 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
     <head>
         @include('partials.head')
-    </head>
+        <style>
+            [x-cloak] {
+                display: none !important;
+            }
+        </style>
+        @filamentStyles 
+
+        </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800">
         <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
@@ -14,6 +21,25 @@
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Platform')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
+                </flux:navlist.group>
+            </flux:navlist>
+            <flux:navlist variant="outline">
+                <flux:navlist.group :heading="__('Maestros y Recursos')" class="grid">
+                    <flux:navlist.item icon="archive-box" :href="route('inventories.index')" :current="request()->routeIs('inventories.index')" wire:navigate>{{ __('Manage Inventories') }}</flux:navlist.item>
+                    <flux:navlist.item icon="shopping-bag" :href="route('items.index')" :current="request()->routeIs('items.index')" wire:navigate>{{ __('Manage Items') }}</flux:navlist.item>
+                </flux:navlist.group>
+
+                <flux:navlist.group :heading="__('Registro y Venta')" class="grid">
+                    <flux:navlist.item icon="users" :href="route('customers.index')" :current="request()->routeIs('customers.index')" wire:navigate>{{ __('Manage Customers') }}</flux:navlist.item>
+                    <flux:navlist.item icon="credit-card" :href="route('payment-methods.index')" :current="request()->routeIs('payment-methods.index')" wire:navigate>{{ __('Manage Payment Methods') }}</flux:navlist.item>
+                </flux:navlist.group>
+
+                <flux:navlist.group :heading="__('Ventas')" class="grid">
+                    <flux:navlist.item icon="shopping-cart" :href="route('sales.index')" :current="request()->routeIs('sales.index')" wire:navigate>{{ __('Manage Sales') }}</flux:navlist.item>
+                </flux:navlist.group>
+
+                <flux:navlist.group :heading="__('Administración y Control')" class="grid">
+                    <flux:navlist.item icon="user" :href="route('users.index')" :current="request()->routeIs('users.index')" wire:navigate>{{ __('Manage Users') }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
 
@@ -126,7 +152,8 @@
         </flux:header>
 
         {{ $slot }}
-
+        
+        @livewire('notifications')
         @fluxScripts
     </body>
 </html>
