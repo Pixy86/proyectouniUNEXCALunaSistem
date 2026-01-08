@@ -19,6 +19,7 @@ use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
@@ -57,8 +58,8 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                     ->searchable(),
                 TextColumn::make(name: 'email')
                     ->searchable(),
-                IconColumn::make(name: 'estado')
-                    ->boolean()
+                ToggleColumn::make(name: 'estado')
+                    ->label(label: 'Estado')
                     ->sortable(),
             ])
             ->filters(filters: [
@@ -85,7 +86,9 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                         Textarea::make(name: 'direccion')
                             ->rows(rows: 2),
                         Toggle::make(name: 'estado')
-                            ->default(condition: true),
+                            ->label(label: 'Activo')
+                            ->default(true)
+                            ->onColor(color: 'success')
                     ])
                     ->action(action: function (array $data) {
                         Customer::create($data);
@@ -116,7 +119,10 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                 TextInput::make(name: 'tipo_vehiculo')
                                     ->label(label: 'Tipo de Vehículo'),
                                 Toggle::make(name: 'estado')
-                                    ->default(condition: true),
+                                    ->label(label: 'Activo')
+                                    ->default(true)
+                                    ->onColor(color: 'success')
+                                    ->offColor(color: 'danger'),
                             ])
                             ->columns(columns: 2)
                             ->itemLabel(fn (array $state): ?string => $state['placa'] ?? null),
