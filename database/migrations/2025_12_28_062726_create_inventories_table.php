@@ -12,10 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('inventories', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId(column:'item_id')->constrained(table:'items')->onDelete('cascade');   
-            $table->integer(column:'quantity')->default(value:0);
-            $table->string(column: 'description')->nullable();
+            $table->id();   
+            $table->string('nombreProducto');   
+            $table->text('descripcion')->nullable();
+            $table->string('sku')->unique();
+            $table->integer('stockActual')->default(0);
+            $table->boolean('estado')->default(true);
             $table->timestamps();
         });
     }

@@ -11,7 +11,7 @@ class SalesItem extends Model
     use HasFactory;
     protected $fillable = [
         'sale_id',
-        'item_id',
+        'service_id',
         'quantity',
         'price',
     ];
@@ -19,8 +19,8 @@ class SalesItem extends Model
     {
         return $this->belongsTo(Sale::class);
     }
-    public function item()
+    public function service()
     {
-        return $this->belongsTo(Item::class);
+        return $this->belongsTo(Service::class);
     }
 }

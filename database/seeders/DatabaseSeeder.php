@@ -3,11 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use App\Models\Item;
 use App\Models\Inventory;
 use App\Models\Customer;
 use App\Models\Vehicle;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -17,15 +15,40 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Administrador Principal (Acceso total al sistema)
+        User::factory()->create([
+            'name' => 'Josue',
+            'email' => 'josue@sgiosci.com',
+            'password' => bcrypt('admin123'),
+            'role' => 'Administrador',
+            'estado' => true,
+        ]);
 
-       // User::factory()->create([
-         //   'name' => 'Test User',
-        // 'email' => 'test@example.com',
-        //]);
+        // Perfiles de prueba para diferentes departamentos
+        User::factory()->create([
+            'name' => 'Juan Encargado',
+            'email' => 'juan@sgiosci.com',
+            'password' => bcrypt('password'),
+            'role' => 'Encargado',
+            'estado' => true,
+        ]);
+
+        User::factory()->create([
+            'name' => 'Maria Recepcionista',
+            'email' => 'maria@sgiosci.com',
+            'password' => bcrypt('password'),
+            'role' => 'Recepcionista',
+            'estado' => true,
+        ]);
+
+        // Generamos datos maestros para el funcionamiento del taller
+        \App\Models\PaymentMethod::factory(3)->create();
         Inventory::factory(10)->create();
+        
+        // Creamos clientes con sus vehículos y ventas históricas vinculadas
         Customer::factory(10)
             ->hasVehicles(2)
+            ->hasSales(1)
             ->create();
     }
 }

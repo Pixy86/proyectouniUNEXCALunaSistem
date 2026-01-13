@@ -6,7 +6,7 @@ use App\Livewire\Settings\Profile;
 use App\Livewire\Settings\TwoFactor;
 use App\Livewire\Customers\Customers;
 use App\Livewire\Inventories\ListInventories;
-use App\Livewire\Items\ListItems;
+use App\Livewire\Services\Services;
 use App\Livewire\Managment\ListPaymentMethods;
 use App\Livewire\Managment\ListUser;
 use App\Livewire\Sales\ListSales;
@@ -21,6 +21,7 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+// Configuración y Perfil de Usuario
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
@@ -40,11 +41,23 @@ Route::middleware(['auth'])->group(function () {
         ->name('two-factor.show');
 });
 
+// Gestión Principal del Sistema
 Route::middleware(['auth'])->group(function (): void {
+    // Ventas y Facturación
     Route::get('/manage-sales', ListSales::class)->name('sales.index');
-    Route::get('/manage-items', ListItems::class)->name('items.index');    
+
+    // Catálogo de Servicios
+    Route::get('/manage-services', Services::class)->name('services.index');
+
+    // Registro de Clientes
     Route::get('/manage-customers', Customers::class)->name('customers.index');
+
+    // Control de Inventarios
     Route::get('/manage-inventories', ListInventories::class)->name('inventories.index');
-    Route::get('/manage-users', ListUser::class)->name('users.index');  
+
+    // Administración de Usuarios (Solo Admin)
+    Route::get('/manage-users', ListUser::class)->name('users.index');
+
+    // Configuración de Métodos de Pago (Solo Admin)
     Route::get('/manage-payment-methods', ListPaymentMethods::class)->name('payment-methods.index');
 });

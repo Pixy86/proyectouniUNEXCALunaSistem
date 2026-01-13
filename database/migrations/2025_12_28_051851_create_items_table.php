@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('items', function (Blueprint $table) {
+        Schema::create('services', function (Blueprint $table) {
             $table->id();
-            $table->string(column: 'name');
-            $table->string(column:'sku')->unique();
-            $table->decimal(column:'price', total: 8, places: 2);
-            $table->enum(column: 'status', allowed: ['active', 'inactive'])->default(value: 'active');
+            $table->string('nombre');
+            $table->text('descripcion')->nullable();
+            $table->decimal('precio', 10, 2);
+            $table->integer('cantidad')->default(0);
+            $table->boolean('estado')->default(true);
+            $table->softDeletes();
             $table->timestamps();
         });
     }
@@ -26,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('items');
+        Schema::dropIfExists('services');
     }
 };

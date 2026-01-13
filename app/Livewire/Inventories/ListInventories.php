@@ -10,11 +10,21 @@ use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
-use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Actions\Action;
 use App\Models\Inventory;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Notifications\Notification;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Placeholder;
+use Filament\Actions\CreateAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Livewire\Component;
 
 class ListInventories extends Component implements HasActions, HasSchemas, HasTable
@@ -26,28 +36,142 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
     public function table(Table $table): Table
     {
         return $table
-            ->query(query: fn (): Builder => Inventory::query())
-            ->columns(components: [
-                TextColumn::make(name: 'item.name')
+            // Gestión de productos e insumos requeridos para los servicios
+            ->query(fn (): Builder => Inventory::query())
+            ->columns([
+                TextColumn::make('nombreProducto')
+                    ->label('Nombre del Producto')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make(name: 'quantity')
-                    ->sortable()
-                    ->badge(),
-                TextColumn::make(name: 'description')
+                TextColumn::make('sku')
+                    ->label('SKU / Código')
+                    ->badge()
                     ->searchable()
                     ->sortable(),
-                TextColumn::make(name: 'created_at')
+                TextColumn::make('stockActual')
+                    ->label('Stock Actual')
+                    ->numeric()
+                    ->badge()
+                    ->color(fn (int $state): string => $state === 0 ? 'danger' : ($state < 10 ? 'warning' : 'success'))
+                    ->sortable(),
+                IconColumn::make('estado')
+                    ->label('Estado')
+                    ->boolean()
+                    ->sortable(),
+                TextColumn::make('created_at')
+                    ->label('Registrado')
+                    ->dateTime()
+                    ->since()
                     ->sortable()
-            ])
-            ->filters(filters: [
-                //
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->headerActions([
-                //
+                CreateAction::make()
+                    ->label('Nuevo Producto')
+                    ->icon('heroicon-m-plus')
+                    ->modalWidth('2xl')
+                    ->form([
+                        \Filament\Schemas\Components\Section::make('Información del Producto')
+                            ->schema([
+                                \Filament\Schemas\Components\Grid::make(2)
+                                    ->schema([
+                                        TextInput::make('nombreProducto')
+                                            ->label('Nombre del Producto')
+                                            ->required()
+                                            ->maxLength(255),
+                                        TextInput::make('sku')
+                                            ->label('SKU / Código')
+                                            ->required()
+                                            ->unique(ignoreRecord: true)
+                                            ->maxLength(100),
+                                        TextInput::make('stockActual')
+                                            ->label('Stock Inicial')
+                                            ->numeric()
+                                            ->default(0)
+                                            ->required(),
+                                        Toggle::make('estado')
+                                            ->label('Activo')
+                                            ->default(true)
+                                            ->onColor('success'),
+                                    ]),
+                                Textarea::make('descripcion')
+                                    ->label('Descripción')
+                                    ->rows(3),
+                            ]),
+                    ]),
             ])
-            ->recordActions([
-                //
+            ->actions([
+                ViewAction::make()
+                    ->label('')
+                    ->tooltip('Consultar Detalles')
+                    ->iconButton()
+                    ->size('lg')
+                    ->form([
+                        \Filament\Schemas\Components\Section::make('Detalles del Producto')
+                            ->schema([
+                                \Filament\Schemas\Components\Grid::make(2)
+                                    ->schema([
+                                        Placeholder::make('nombreProducto')
+                                            ->label('Nombre')
+                                            ->content(fn ($record) => $record->nombreProducto),
+                                        Placeholder::make('sku')
+                                            ->label('SKU')
+                                            ->content(fn ($record) => $record->sku),
+                                        Placeholder::make('stockActual')
+                                            ->label('Stock')
+                                            ->content(fn ($record) => $record->stockActual),
+                                        Placeholder::make('estado')
+                                            ->label('Estado')
+                                            ->content(fn ($record) => $record->estado ? 'Activo' : 'Inactivo'),
+                                        Placeholder::make('created_at')
+                                            ->label('Fecha de Registro')
+                                            ->content(fn ($record) => $record->created_at?->format('d/m/Y H:i') ?? 'N/A'),
+                                    ]),
+                                Placeholder::make('descripcion')
+                                    ->label('Descripción')
+                                    ->content(fn ($record) => $record->descripcion ?? 'Sin descripción'),
+                            ]),
+                    ]),
+                EditAction::make()
+                    ->label('')
+                    ->tooltip('Editar Producto')
+                    ->iconButton()
+                    ->size('lg')
+                    ->form([
+                        \Filament\Schemas\Components\Section::make('Actualizar Producto')
+                            ->schema([
+                                \Filament\Schemas\Components\Grid::make(2)
+                                    ->schema([
+                                        TextInput::make('nombreProducto')
+                                            ->label('Nombre del Producto')
+                                            ->required(),
+                                        TextInput::make('sku')
+                                            ->label('SKU / Código')
+                                            ->required()
+                                            ->unique(ignoreRecord: true),
+                                        TextInput::make('stockActual')
+                                            ->label('Stock Actual')
+                                            ->numeric()
+                                            ->required(),
+                                        Toggle::make('estado')
+                                            ->label('Activo')
+                                            ->onColor('success'),
+                                        DateTimePicker::make('created_at')
+                                            ->label('Fecha de Registro')
+                                            ->disabled()
+                                            ->dehydrated(false)
+                                            ->visible(fn ($record) => $record !== null),
+                                    ]),
+                                Textarea::make('descripcion')
+                                    ->label('Descripción')
+                                    ->rows(3),
+                            ]),
+                    ]),
+                DeleteAction::make()
+                    ->label('')
+                    ->tooltip('Eliminar')
+                    ->iconButton()
+                    ->size('lg'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -5,21 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Item extends Model
+class Service extends Model
 {
-    /** @use HasFactory<\Database\Factories\ItemFactory> */
-    use HasFactory;
+    /** @use HasFactory<\Database\Factories\ServiceFactory> */
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'name',
-        'sku',
-        'price',
-        'status',
-    
+        'nombre',
+        'descripcion',
+        'precio',
+        'cantidad',
+        'estado',
     ];
-    public function Inventory(): HasOne
 
+    public function inventory(): HasOne
     {
         return $this->hasOne(Inventory::class);
     }

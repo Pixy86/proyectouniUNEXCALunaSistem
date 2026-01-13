@@ -29,6 +29,25 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
+
+        // Lógica personalizada para el inicio de sesión
+        // Bloqueamos el acceso si el usuario ha sido desactivado por un administrador
+        Fortify::authenticateUsing(function (Request $request) {
+            $user = \App\Models\User::where('email', $request->email)->first();
+
+            if ($user && 
+                \Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
+                
+                // Verificamos el campo 'estado' (true = activo, false = inactivo)
+                if (!$user->estado) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        Fortify::username() => [__('Tu cuenta ha sido desactivada por un administrador.')],
+                    ]);
+                }
+
+                return $user;
+            }
+        });
     }
 
     /**

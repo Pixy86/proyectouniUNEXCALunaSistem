@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\Item;
+use App\Models\Service;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Inventory>
@@ -18,9 +18,11 @@ class InventoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'item_id' => Item::factory(),
-            'quantity' => $this->faker->numberBetween(10, 100),
-            'description' => $this->faker->sentence(),
+            'nombreProducto' => $this->faker->words(3, true),
+            'descripcion' => $this->faker->sentence(),
+            'sku' => $this->faker->unique()->bothify('PROD-####-????'),
+            'stockActual' => $this->faker->numberBetween(10, 1000),
+            'estado' => true,
         ];
     }
 }

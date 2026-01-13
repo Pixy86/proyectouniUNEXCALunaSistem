@@ -26,21 +26,25 @@
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Maestros y Recursos')" class="grid">
                     <flux:navlist.item icon="archive-box" :href="route('inventories.index')" :current="request()->routeIs('inventories.index')" wire:navigate>{{ __('Manage Inventories') }}</flux:navlist.item>
-                    <flux:navlist.item icon="shopping-bag" :href="route('items.index')" :current="request()->routeIs('items.index')" wire:navigate>{{ __('Manage Items') }}</flux:navlist.item>
+                    <flux:navlist.item icon="wrench-screwdriver" :href="route('services.index')" :current="request()->routeIs('services.index')" wire:navigate>{{ __('Manage Services') }}</flux:navlist.item>
                 </flux:navlist.group>
 
                 <flux:navlist.group :heading="__('Registro y Venta')" class="grid">
                     <flux:navlist.item icon="users" :href="route('customers.index')" :current="request()->routeIs('customers.index')" wire:navigate>{{ __('Manage Customers') }}</flux:navlist.item>
-                    <flux:navlist.item icon="credit-card" :href="route('payment-methods.index')" :current="request()->routeIs('payment-methods.index')" wire:navigate>{{ __('Manage Payment Methods') }}</flux:navlist.item>
+                    @if(auth()->user()?->role === 'Administrador')
+                        <flux:navlist.item icon="credit-card" :href="route('payment-methods.index')" :current="request()->routeIs('payment-methods.index')" wire:navigate>{{ __('Manage Payment Methods') }}</flux:navlist.item>
+                    @endif
                 </flux:navlist.group>
 
                 <flux:navlist.group :heading="__('Ventas')" class="grid">
                     <flux:navlist.item icon="shopping-cart" :href="route('sales.index')" :current="request()->routeIs('sales.index')" wire:navigate>{{ __('Manage Sales') }}</flux:navlist.item>
                 </flux:navlist.group>
 
-                <flux:navlist.group :heading="__('Administración y Control')" class="grid">
-                    <flux:navlist.item icon="user" :href="route('users.index')" :current="request()->routeIs('users.index')" wire:navigate>{{ __('Manage Users') }}</flux:navlist.item>
-                </flux:navlist.group>
+                @if(auth()->user()?->role === 'Administrador')
+                    <flux:navlist.group :heading="__('Administración y Control')" class="grid">
+                        <flux:navlist.item icon="user" :href="route('users.index')" :current="request()->routeIs('users.index')" wire:navigate>{{ __('Manage Users') }}</flux:navlist.item>
+                    </flux:navlist.group>
+                @endif
             </flux:navlist>
 
             <flux:spacer />
@@ -154,6 +158,7 @@
         {{ $slot }}
         
         @livewire('notifications')
+        @filamentScripts
         @fluxScripts
     </body>
 </html>
