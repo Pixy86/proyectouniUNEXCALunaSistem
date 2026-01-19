@@ -36,13 +36,19 @@
                     @endif
                 </flux:navlist.group>
 
+                <flux:navlist.group :heading="__('Operaciones')" class="grid">
+                    <flux:navlist.item icon="presentation-chart-line" :href="route('pos.index')" :current="request()->routeIs('pos.index')" wire:navigate>{{ __('Punto de Venta (POS)') }}</flux:navlist.item>
+                    <flux:navlist.item icon="clipboard-document-list" :href="route('service-orders.index')" :current="request()->routeIs('service-orders.index')" wire:navigate>{{ __('Órdenes de Servicio') }}</flux:navlist.item>
+                </flux:navlist.group>
+
                 <flux:navlist.group :heading="__('Ventas')" class="grid">
-                    <flux:navlist.item icon="shopping-cart" :href="route('sales.index')" :current="request()->routeIs('sales.index')" wire:navigate>{{ __('Manage Sales') }}</flux:navlist.item>
+                    <flux:navlist.item icon="shopping-cart" :href="route('sales.index')" :current="request()->routeIs('sales.index')" wire:navigate>{{ __('Historial de Ventas') }}</flux:navlist.item>
                 </flux:navlist.group>
 
                 @if(auth()->user()?->role === 'Administrador')
                     <flux:navlist.group :heading="__('Administración y Control')" class="grid">
-                        <flux:navlist.item icon="user" :href="route('users.index')" :current="request()->routeIs('users.index')" wire:navigate>{{ __('Manage Users') }}</flux:navlist.item>
+                        <flux:navlist.item icon="user" :href="route('users.index')" :current="request()->routeIs('users.index')" wire:navigate>{{ __('Usuarios') }}</flux:navlist.item>
+                        <flux:navlist.item icon="shield-check" :href="route('audit.index')" :current="request()->routeIs('audit.index')" wire:navigate>{{ __('Auditoría') }}</flux:navlist.item>
                     </flux:navlist.group>
                 @endif
             </flux:navlist>

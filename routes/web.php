@@ -17,7 +17,7 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::view('dashboard', 'dashboard')
+Route::get('/dashboard', \App\Livewire\Dashboard::class)
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
@@ -60,4 +60,23 @@ Route::middleware(['auth'])->group(function (): void {
 
     // Configuración de Métodos de Pago (Solo Admin)
     Route::get('/manage-payment-methods', ListPaymentMethods::class)->name('payment-methods.index');
+
+    // Auditoría (Solo Admin)
+    Route::get('/audit-logs', \App\Livewire\Audit\ListAuditLogs::class)->name('audit.index');
+
+    // Órdenes de Servicio
+    Route::get('/service-orders', \App\Livewire\ServiceOrders\ListServiceOrders::class)->name('service-orders.index');
+
+    // Punto de Venta (POS)
+    Route::get('/pos', \App\Livewire\POS::class)->name('pos.index');
+});
+
+// Ruta temporal para solucionar problemas de base de datos
+Route::get('/migrate-fix', function() {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate:fresh', ['--seed' => true]);
+        return "<h1>✅ Migración Completada Exitosamente!</h1><pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre><br><a href='/'>Ir al Inicio</a>";
+    } catch (\Exception $e) {
+        return "<h1>❌ Error:</h1><pre>" . $e->getMessage() . "</pre>";
+    }
 });

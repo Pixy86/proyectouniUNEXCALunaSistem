@@ -20,9 +20,9 @@ class Service extends Model
         'estado',
     ];
 
-    public function inventory(): HasOne
+    public function inventory()
     {
-        return $this->hasOne(Inventory::class);
+        return $this->belongsTo(Inventory::class);
     }
 
     public function salesItems()
