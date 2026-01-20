@@ -79,7 +79,7 @@
 }
 
 [data-flux-label] {
-    @apply  !mb-0 !leading-tight;
+    @apply !mb-0 !leading-tight;
 }
 
 input:focus[data-flux-control],
@@ -88,6 +88,25 @@ select:focus[data-flux-control] {
     @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
 }
 
-/* \[:where(&)\]:size-4 {
-    @apply size-4;
-} */
+@layer utilities {
+    .sidebar-expanded {
+        width: 16rem;
+        /* Equivalent to w-64 */
+    }
+
+    .sidebar-collapsed {
+        width: 4rem;
+        /* Equivalent to w-16 */
+    }
+
+    .sidebar-transition {
+        transition-property: width;
+        transition-duration: 300ms;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Hide nav group headings when sidebar is collapsed */
+    .sidebar-collapsed .nav-group>div:first-child {
+        display: none;
+    }
+}

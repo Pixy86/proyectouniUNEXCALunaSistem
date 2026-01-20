@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('nombreProducto');   
             $table->text('descripcion')->nullable();
             $table->string('sku')->unique();
+
+
             $table->integer('stockActual')->default(0);
             $table->boolean('estado')->default(true);
             $table->timestamps();

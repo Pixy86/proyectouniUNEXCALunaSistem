@@ -63,7 +63,7 @@ class POS extends Component
             ->whereHas('inventory', function (Builder $query) {
                 $query->where('stockActual', '>', 0);
             })
-            ->with('inventory') // Eager load stock check
+            ->with('inventory')
             ->get();
 
         // Carga solo los campos necesarios de clientes para mejorar rendimiento

@@ -18,6 +18,7 @@ class Service extends Model
         'precio',
         'cantidad',
         'estado',
+        'inventory_id',
     ];
 
     public function inventory()

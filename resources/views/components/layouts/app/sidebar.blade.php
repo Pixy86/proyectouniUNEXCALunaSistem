@@ -10,67 +10,86 @@
         @filamentStyles 
 
         </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+    <body class="min-h-screen bg-white dark:bg-zinc-800" x-data="{ sidebarExpanded: false }">
+        <flux:sidebar sticky stashable 
+            @mouseenter="sidebarExpanded = true"
+            @mouseleave="sidebarExpanded = false"
+            class="sidebar-transition border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900"
+            ::class="sidebarExpanded ? 'sidebar-expanded' : 'sidebar-collapsed'"
+        >
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
-            <a href="{{ route('dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
-                <x-app-logo />
-            </a>
+            <div class="flex items-center h-8">
+                <a href="{{ route('dashboard') }}" class="flex-1 flex items-center space-x-2 rtl:space-x-reverse min-w-0" wire:navigate>
+                    <x-app-logo />
+                    <span x-show="sidebarExpanded" x-transition.opacity.duration.300ms class="truncate font-semibold text-zinc-900 dark:text-white">SGIOSCI</span>
+                </a>
+            </div>
 
             <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Platform')" class="grid">
-                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
+                <flux:navlist.group :heading="__('Plataforma')" class="nav-group grid">
+                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
+                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Tablero') }}</span>
+                    </flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
+
             <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Maestros y Recursos')" class="grid">
-                    <flux:navlist.item icon="archive-box" :href="route('inventories.index')" :current="request()->routeIs('inventories.index')" wire:navigate>{{ __('Manage Inventories') }}</flux:navlist.item>
-                    <flux:navlist.item icon="wrench-screwdriver" :href="route('services.index')" :current="request()->routeIs('services.index')" wire:navigate>{{ __('Manage Services') }}</flux:navlist.item>
+                <flux:navlist.group :heading="__('Maestros y Recursos')" class="nav-group grid">
+                    <flux:navlist.item icon="archive-box" :href="route('inventories.index')" :current="request()->routeIs('inventories.index')" wire:navigate>
+                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Inventarios') }}</span>
+                    </flux:navlist.item>
+                    <flux:navlist.item icon="wrench-screwdriver" :href="route('services.index')" :current="request()->routeIs('services.index')" wire:navigate>
+                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Servicios') }}</span>
+                    </flux:navlist.item>
                 </flux:navlist.group>
 
-                <flux:navlist.group :heading="__('Registro y Venta')" class="grid">
-                    <flux:navlist.item icon="users" :href="route('customers.index')" :current="request()->routeIs('customers.index')" wire:navigate>{{ __('Manage Customers') }}</flux:navlist.item>
+                <flux:navlist.group :heading="__('Registro y Venta')" class="nav-group grid">
+                    <flux:navlist.item icon="users" :href="route('customers.index')" :current="request()->routeIs('customers.index')" wire:navigate>
+                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Clientes') }}</span>
+                    </flux:navlist.item>
                     @if(auth()->user()?->role === 'Administrador')
-                        <flux:navlist.item icon="credit-card" :href="route('payment-methods.index')" :current="request()->routeIs('payment-methods.index')" wire:navigate>{{ __('Manage Payment Methods') }}</flux:navlist.item>
+                        <flux:navlist.item icon="credit-card" :href="route('payment-methods.index')" :current="request()->routeIs('payment-methods.index')" wire:navigate>
+                            <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Métodos de Pago') }}</span>
+                        </flux:navlist.item>
                     @endif
                 </flux:navlist.group>
 
-                <flux:navlist.group :heading="__('Operaciones')" class="grid">
-                    <flux:navlist.item icon="presentation-chart-line" :href="route('pos.index')" :current="request()->routeIs('pos.index')" wire:navigate>{{ __('Punto de Venta (POS)') }}</flux:navlist.item>
-                    <flux:navlist.item icon="clipboard-document-list" :href="route('service-orders.index')" :current="request()->routeIs('service-orders.index')" wire:navigate>{{ __('Órdenes de Servicio') }}</flux:navlist.item>
+                <flux:navlist.group :heading="__('Operaciones')" class="nav-group grid">
+                    <flux:navlist.item icon="presentation-chart-line" :href="route('pos.index')" :current="request()->routeIs('pos.index')" wire:navigate>
+                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Punto de Venta (POS)') }}</span>
+                    </flux:navlist.item>
+                    <flux:navlist.item icon="clipboard-document-list" :href="route('service-orders.index')" :current="request()->routeIs('service-orders.index')" wire:navigate>
+                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Órdenes de Servicio') }}</span>
+                    </flux:navlist.item>
                 </flux:navlist.group>
 
-                <flux:navlist.group :heading="__('Ventas')" class="grid">
-                    <flux:navlist.item icon="shopping-cart" :href="route('sales.index')" :current="request()->routeIs('sales.index')" wire:navigate>{{ __('Historial de Ventas') }}</flux:navlist.item>
+                <flux:navlist.group :heading="__('Ventas')" class="nav-group grid">
+                    <flux:navlist.item icon="shopping-cart" :href="route('sales.index')" :current="request()->routeIs('sales.index')" wire:navigate>
+                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Historial de Ventas') }}</span>
+                    </flux:navlist.item>
                 </flux:navlist.group>
 
                 @if(auth()->user()?->role === 'Administrador')
-                    <flux:navlist.group :heading="__('Administración y Control')" class="grid">
-                        <flux:navlist.item icon="user" :href="route('users.index')" :current="request()->routeIs('users.index')" wire:navigate>{{ __('Usuarios') }}</flux:navlist.item>
-                        <flux:navlist.item icon="shield-check" :href="route('audit.index')" :current="request()->routeIs('audit.index')" wire:navigate>{{ __('Auditoría') }}</flux:navlist.item>
+                    <flux:navlist.group :heading="__('Administración y Control')" class="nav-group grid">
+                        <flux:navlist.item icon="user" :href="route('users.index')" :current="request()->routeIs('users.index')" wire:navigate>
+                            <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Usuarios') }}</span>
+                        </flux:navlist.item>
+                        <flux:navlist.item icon="shield-check" :href="route('audit.index')" :current="request()->routeIs('audit.index')" wire:navigate>
+                            <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Auditoría') }}</span>
+                        </flux:navlist.item>
                     </flux:navlist.group>
                 @endif
             </flux:navlist>
 
             <flux:spacer />
 
-            <flux:navlist variant="outline">
-                <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                {{ __('Repository') }}
-                </flux:navlist.item>
-
-                <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                {{ __('Documentation') }}
-                </flux:navlist.item>
-            </flux:navlist>
-
             <!-- Desktop User Menu -->
             <flux:dropdown class="hidden lg:block" position="bottom" align="start">
                 <flux:profile
-                    :name="auth()->user()->name"
+                    ::name="sidebarExpanded ? '{{ auth()->user()->name }}' : ''"
                     :initials="auth()->user()->initials()"
-                    icon:trailing="chevrons-up-down"
+                    ::icon-trailing="sidebarExpanded ? 'chevron-up-down' : ''"
                 />
 
                 <flux:menu class="w-[220px]">
@@ -96,7 +115,7 @@
                     <flux:menu.separator />
 
                     <flux:menu.radio.group>
-                        <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>{{ __('Settings') }}</flux:menu.item>
+                        <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>{{ __('Configuración') }}</flux:menu.item>
                     </flux:menu.radio.group>
 
                     <flux:menu.separator />
@@ -104,7 +123,7 @@
                     <form method="POST" action="{{ route('logout') }}" class="w-full">
                         @csrf
                         <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
-                            {{ __('Log Out') }}
+                            {{ __('Cerrar Sesión') }}
                         </flux:menu.item>
                     </form>
                 </flux:menu>
