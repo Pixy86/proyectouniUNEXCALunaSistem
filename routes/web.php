@@ -67,7 +67,7 @@ Route::middleware(['auth'])->group(function (): void {
     // Órdenes de Servicio
     Route::get('/service-orders', \App\Livewire\ServiceOrders\ListServiceOrders::class)->name('service-orders.index');
 
-    // Punto de Venta (POS)
+    // Venta (POS)
     Route::get('/pos', \App\Livewire\POS::class)->name('pos.index');
 });
 

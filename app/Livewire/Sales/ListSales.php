@@ -26,9 +26,18 @@ class ListSales extends Component implements HasActions, HasSchemas, HasTable
         return $table
             ->query(fn (): Builder => Sale::query())
             ->columns([
-                \Filament\Tables\Columns\TextColumn::make('customer.name')
+                \Filament\Tables\Columns\TextColumn::make('customer.nombre')
                     ->label('Cliente')
-                    ->searchable()
+                    ->formatStateUsing(fn ($record) => $record->customer ? "{$record->customer->nombre} {$record->customer->apellido}" : 'N/A')
+                    ->searchable(['nombre', 'apellido'])
+                    ->sortable(),
+                \Filament\Tables\Columns\TextColumn::make('user.name')
+                    ->label('Vendedor')
+                    ->placeholder('Sistema')
+                    ->sortable(),
+                \Filament\Tables\Columns\TextColumn::make('service_order_id')
+                    ->label('Orden de Servicio')
+                    ->placeholder('Venta Directa')
                     ->sortable(),
                 \Filament\Tables\Columns\TextColumn::make('paymentMethod.nombre')
                     ->label('Método de Pago')

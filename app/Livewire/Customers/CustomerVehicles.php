@@ -9,6 +9,7 @@ use Filament\Tables\Actions\CreateAction;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -53,8 +54,15 @@ class CustomerVehicles extends Component implements HasForms, HasTable, HasActio
                             ->required(),
                         TextInput::make('color')
                             ->required(),
-                        TextInput::make('tipo_vehiculo')
+                        Select::make('tipo_vehiculo')
                             ->label('Tipo de Vehículo')
+                            ->options([
+                                'Moto' => 'Moto',
+                                'Carro' => 'Carro',
+                                'Camioneta' => 'Camioneta',
+                                'Camioneta extra grande' => 'Camioneta extra grande',
+                                'Otros' => 'Otros',
+                            ])
                             ->required(),
                         Toggle::make('estado')
                             ->label('Activo')
@@ -106,8 +114,15 @@ class CustomerVehicles extends Component implements HasForms, HasTable, HasActio
                             ->required(),
                         TextInput::make('color')
                             ->required(),
-                        TextInput::make('tipo_vehiculo')
+                        Select::make('tipo_vehiculo')
                             ->label('Tipo de Vehículo')
+                            ->options([
+                                'Moto' => 'Moto',
+                                'Carro' => 'Carro',
+                                'Camioneta' => 'Camioneta',
+                                'Camioneta extra grande' => 'Camioneta extra grande',
+                                'Otros' => 'Otros',
+                            ])
                             ->required(),
                         Toggle::make('estado')
                             ->label('Activo')

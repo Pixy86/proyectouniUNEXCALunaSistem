@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Managment;
 
+use App\Models\AuditLog;
 use App\Models\PaymentMethod;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -76,7 +77,13 @@ class ListPaymentMethods extends Component implements HasActions, HasSchemas, Ha
                             ]),
                     ])
                     ->action(function (array $data) {
-                        PaymentMethod::create($data);
+                        $method = PaymentMethod::create($data);
+                        AuditLog::registrar(
+                            accion: AuditLog::ACCION_CREATE,
+                            descripcion: "Nuevo método de pago registrado: {$method->nombre}",
+                            modelo: 'PaymentMethod',
+                            modeloId: $method->id
+                        );
                         Notification::make()
                             ->title('Método Creado')
                             ->success()

@@ -57,7 +57,7 @@
 
                 <flux:navlist.group :heading="__('Operaciones')" class="nav-group grid">
                     <flux:navlist.item icon="presentation-chart-line" :href="route('pos.index')" :current="request()->routeIs('pos.index')" wire:navigate>
-                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Punto de Venta (POS)') }}</span>
+                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Venta') }}</span>
                     </flux:navlist.item>
                     <flux:navlist.item icon="clipboard-document-list" :href="route('service-orders.index')" :current="request()->routeIs('service-orders.index')" wire:navigate>
                         <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Órdenes de Servicio') }}</span>
@@ -165,7 +165,7 @@
                     <flux:menu.separator />
 
                     <flux:menu.radio.group>
-                        <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>{{ __('Settings') }}</flux:menu.item>
+                        <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>{{ __('Configuración') }}</flux:menu.item>
                     </flux:menu.radio.group>
 
                     <flux:menu.separator />
@@ -173,7 +173,7 @@
                     <form method="POST" action="{{ route('logout') }}" class="w-full">
                         @csrf
                         <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
-                            {{ __('Log Out') }}
+                            {{ __('Cerrar Sesión') }}
                         </flux:menu.item>
                     </form>
                 </flux:menu>

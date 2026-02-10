@@ -13,7 +13,6 @@ class Inventory extends Model
     protected $fillable = [
         'nombreProducto',
         'descripcion',
-        'sku',
         'stockActual',
         'estado',
     ];

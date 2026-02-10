@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\ServiceOrder;
 use App\Models\Service;
 use App\Models\Customer;
 use App\Models\PaymentMethod;
@@ -9,15 +10,17 @@ use App\Models\Sale;
 use App\Models\SalesItem;
 use Livewire\Component;
 use Filament\Notifications\Notification;
+use App\Models\AuditLog;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 use Livewire\Attributes\Computed;
 
 class POS extends Component
 {
     // Colecciones de datos para el sistema POS
-    public $services;
+    public $serviceOrders;
     public $customers;
     public $paymentMethods;
     
@@ -28,6 +31,7 @@ class POS extends Component
     // Properties for checkout
     public $customer_id = null;
     public $vehicle_id = null;
+    public $order_id = null; // Associated order ID
     public $payment_method_id = null;
     public $paid_amount = 0; // Amount paid by customer
     public $discount_percentage = 0; // Discount as percentage
@@ -54,16 +58,12 @@ class POS extends Component
         }
     }
 
-    // Carga servicios activos con stock disponible, clientes y métodos de pago
+    // Carga órdenes de servicio en proceso, clientes y métodos de pago
     public function loadData()
     {
-        // Cargamos los servicios activos que tengan un item de inventario con stock > 0
-        $this->services = Service::query()
-            ->where('estado', true)
-            ->whereHas('inventory', function (Builder $query) {
-                $query->where('stockActual', '>', 0);
-            })
-            ->with('inventory')
+        // Cargamos las órdenes de servicio que estén "En Proceso"
+        $this->serviceOrders = ServiceOrder::with(['customer', 'vehicle', 'items.service'])
+            ->where('status', ServiceOrder::STATUS_EN_PROCESO)
             ->get();
 
         // Carga solo los campos necesarios de clientes para mejorar rendimiento
@@ -89,12 +89,13 @@ class POS extends Component
     public function filteredItems()
     {
         if (empty($this->search)) {
-            return $this->services;
+            return $this->serviceOrders;
         }
 
-        return $this->services->filter(function ($service) {
-            return str_contains(strtolower($service->nombre), strtolower($this->search))
-                || str_contains(strtolower($service->descripcion), strtolower($this->search));
+        return $this->serviceOrders->filter(function ($order) {
+            return str_contains(strtolower($order->customer?->nombre ?? ''), strtolower($this->search))
+                || str_contains(strtolower($order->vehicle?->placa ?? ''), strtolower($this->search))
+                || str_contains(strtolower((string)$order->id), strtolower($this->search));
         });
     }
 
@@ -103,42 +104,54 @@ class POS extends Component
         // No necesitamos recargar data, el computed property se encarga
     }
 
-    // Agrega un servicio al carrito de compras
-    public function addToCart($serviceId)
+    // Agrega una orden de servicio al carrito de compras
+    public function addToCart($orderId)
     {
-        $service = Service::find($serviceId);
+        $order = ServiceOrder::with(['items.service', 'customer', 'vehicle'])->find($orderId);
         
-        if (!$service) {
+        if (!$order) {
             return;
         }
 
-        if (isset($this->cart[$serviceId])) {
-            $this->cart[$serviceId]['quantity']++;
-        } else {
-            $this->cart[$serviceId] = [
-                'id' => $service->id,
-                'name' => $service->nombre,
-                'price' => $service->precio,
-                'quantity' => 1,
+        // Al seleccionar una orden, sugerimos automáticamente el cliente y vehículo
+        $this->customer_id = $order->customer_id;
+        $this->updatedCustomerId($this->customer_id);
+        $this->vehicle_id = $order->vehicle_id;
+        $this->order_id = $order->id;
+
+        foreach ($order->items as $item) {
+            $serviceId = $item->service_id;
+            // Usamos una llave única que combine servicio y orden para permitir múltiples órdenes si fuera necesario
+            $cartKey = "{$order->id}-{$serviceId}";
+            
+            $this->cart[$cartKey] = [
+                'id' => $serviceId,
+                'name' => "({$order->id}) " . $item->service->nombre,
+                'price' => (float) $item->price,
+                'quantity' => $item->quantity,
+                'order_id' => $order->id,
             ];
         }
         
-        Notification::make()->title('Servicio agregado al carrito')->success()->send();
+        Notification::make()->title('Orden agregada al carrito')->success()->send();
     }
 
-    // Elimina un servicio del carrito de compras
-    public function removeFromCart($serviceId)
+    // Elimina un item del carrito
+    public function removeFromCart($cartKey)
     {
-        unset($this->cart[$serviceId]);
+        unset($this->cart[$cartKey]);
+        if (empty($this->cart)) {
+            $this->reset(['customer_id', 'vehicle_id', 'order_id', 'customerVehicles', 'paid_amount', 'discount_percentage']);
+        }
     }
 
-    // Actualiza la cantidad de un servicio en el carrito
-    public function updateQuantity($serviceId, $quantity)
+    // Actualiza la cantidad de un item en el carrito
+    public function updateQuantity($cartKey, $quantity)
     {
         if ($quantity > 0) {
-            $this->cart[$serviceId]['quantity'] = $quantity;
+            $this->cart[$cartKey]['quantity'] = $quantity;
         } else {
-            $this->removeFromCart($serviceId);
+            $this->removeFromCart($cartKey);
         }
     }
 
@@ -200,24 +213,27 @@ class POS extends Component
 
         // Wrappear todo en una transacción de base de datos para asegurar integridad
         try {
-            \Illuminate\Support\Facades\DB::transaction(function () {
+            $transactionResult = \Illuminate\Support\Facades\DB::transaction(function () {
                 // Verificación de stock antes de procesar
                 foreach ($this->cart as $item) {
                     $service = Service::with('inventory')->find($item['id']);
-                    // Use lockForUpdate to prevent race conditions
-                    if (!$service || !$service->inventory || $service->inventory->stockActual < $item['quantity']) {
+                    if (!$service || ($service->inventory && $service->inventory->stockActual < $item['quantity'])) {
                         throw new \Exception("El servicio '{$item['name']}' no tiene suficiente inventario disponible.");
                     }
                 }
 
                 $sale = Sale::create([
                     'customer_id' => $this->customer_id,
+                    'user_id' => Auth::id(), // Registra el usuario que realiza la venta
                     'vehicle_id' => $this->vehicle_id,
+                    'service_order_id' => $this->order_id,
                     'payment_method_id' => $this->payment_method_id,
                     'total' => $this->total,
                     'paid_amount' => $this->paid_amount ?: $this->total,
                     'discount' => $this->discountVal,
                 ]);
+
+                $orderIds = [];
 
                 foreach ($this->cart as $item) {
                     SalesItem::create([
@@ -227,24 +243,53 @@ class POS extends Component
                         'price' => $item['price'],
                     ]);
 
+                    if (isset($item['order_id'])) {
+                        $orderIds[] = $item['order_id'];
+                    }
+
                     // Decrementar inventario
                     $service = Service::find($item['id']);
                     if ($service) {
-                         // Decrement Inventory Stock
                         if ($service->inventory) {
                             $service->inventory->decrement('stockActual', $item['quantity']);
                         }
-                        
-                        // Decrement Service Limit (Cupo) if applicable
                         if ($service->cantidad > 0) {
                             $service->decrement('cantidad', $item['quantity']);
                         }
                     }
                 }
-            });
 
-            $this->reset(['cart', 'customer_id', 'payment_method_id', 'search', 'paid_amount', 'discount_percentage', 'vehicle_id', 'customerVehicles']);
-            $this->loadData(); // Recarga para actualizar lista basada en nuevo stock
+                // Finalizar las órdenes de servicio involucradas
+                $uniqueOrderIds = array_unique($orderIds);
+                foreach ($uniqueOrderIds as $oid) {
+                    $order = ServiceOrder::find($oid);
+                    if ($order) {
+                        $order->update([
+                            'status' => ServiceOrder::STATUS_TERMINADO,
+                            'completed_at' => now(),
+                        ]);
+                    }
+                }
+
+                return $sale;
+            });
+            
+            $saleId = $transactionResult->id;
+            $saleTotal = $transactionResult->total;
+
+            $this->reset(['cart', 'customer_id', 'payment_method_id', 'search', 'paid_amount', 'discount_percentage', 'vehicle_id', 'order_id', 'customerVehicles']);
+            $this->loadData(); // Recarga para actualizar lista basada en nuevo stock y estado de órdenes
+            
+            // Log Auditoría
+            $customerId = $transactionResult->customer_id;
+            $customerName = \App\Models\Customer::find($customerId)?->nombre ?? 'Cliente';
+            
+            AuditLog::registrar(
+                accion: AuditLog::ACCION_CREATE,
+                descripcion: "Venta de servicio realizada por el usuario [ID: " . Auth::id() . "] a cliente: {$customerName} (ID: {$customerId}). Orden: " . ($transactionResult->service_order_id ?? 'N/A') . ". Total: {$saleTotal}",
+                modelo: 'Sale',
+                modeloId: $saleId
+            );
 
             Notification::make()->title('Venta registrada exitosamente')->success()->send();
 

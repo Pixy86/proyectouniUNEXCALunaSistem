@@ -3,25 +3,41 @@
     <div class="lg:col-span-2 flex flex-col gap-4 h-full overflow-hidden">
         <!-- Search Bar -->
         <div class="bg-white dark:bg-zinc-800 p-4 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700">
-            <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="Buscar servicios..." />
+            <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="Buscar por Orden #, Cliente o Placa..." />
         </div>
 
-        <!-- Services Grid -->
         <div class="flex-1 overflow-y-auto pr-2">
             @if($this->filteredItems->count() > 0)
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    @foreach($this->filteredItems as $service)
-                        <div wire:click="addToCart({{ $service->id }})" 
+                    @foreach($this->filteredItems as $order)
+                        <div wire:click="addToCart({{ $order->id }})" 
                              class="bg-white dark:bg-zinc-800 p-4 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700 cursor-pointer hover:border-indigo-500 dark:hover:border-indigo-400 transition-all group">
                             <div class="flex flex-col h-full justify-between gap-2">
                                 <div>
-                                    <h3 class="font-semibold text-gray-800 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                                        {{ $service->nombre }}
+                                    <div class="flex justify-between items-start mb-1">
+                                        <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">Orden #{{ $order->id }}</span>
+                                        <flux:badge size="sm" color="info" variant="solid">Proceso</flux:badge>
+                                    </div>
+                                    <h3 class="font-semibold text-gray-800 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1">
+                                        {{ $order->customer?->nombre }} {{ $order->customer?->apellido }}
                                     </h3>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{{ $service->descripcion }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                                        {{ $order->vehicle?->placa ?? 'Sin Placa' }} - {{ $order->vehicle?->modelo ?? 'S/V' }}
+                                    </p>
+                                    <div class="mt-2 space-y-1">
+                                        @foreach($order->items->take(2) as $item)
+                                            <div class="text-[10px] text-gray-400 flex justify-between">
+                                                <span class="truncate pr-2">{{ $item->service->nombre }}</span>
+                                                <span class="shrink-0">x{{ $item->quantity }}</span>
+                                            </div>
+                                        @endforeach
+                                        @if($order->items->count() > 2)
+                                            <div class="text-[10px] text-gray-400 italic tracking-tight">+{{ $order->items->count() - 2 }} más...</div>
+                                        @endif
+                                    </div>
                                 </div>
                                 <div class="mt-2 text-lg font-bold text-indigo-600 dark:text-indigo-400">
-                                    ${{ number_format($service->precio, 2) }}
+                                    ${{ number_format($order->total_amount, 2) }}
                                 </div>
                             </div>
                         </div>
@@ -30,7 +46,7 @@
             @else
                 <div class="flex flex-col items-center justify-center h-64 text-gray-500">
                     <flux:icon.magnifying-glass class="w-12 h-12 mb-2 opacity-50" />
-                    <p>No se encontraron servicios</p>
+                    <p>No se encontraron órdenes en proceso</p>
                 </div>
             @endif
         </div>
@@ -47,26 +63,26 @@
 
         <!-- Cart Items -->
         <div class="flex-1 overflow-y-auto p-4 space-y-4">
-            @forelse($cart as $item)
+            @forelse($cart as $key => $item)
                 <div class="flex justify-between items-center bg-zinc-50 dark:bg-zinc-900 rounded-lg p-3 group hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-                    <div class="flex-1">
-                        <h4 class="font-medium text-gray-800 dark:text-gray-200">{{ $item['name'] }}</h4>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-medium text-gray-800 dark:text-gray-200 truncate pr-2">{{ $item['name'] }}</h4>
                         <p class="text-sm text-gray-500">${{ number_format($item['price'], 2) }} x {{ $item['quantity'] }}</p>
                     </div>
                     
                     <div class="flex items-center gap-3">
                         <div class="flex items-center gap-1 bg-white dark:bg-zinc-700 rounded-md border border-zinc-200 dark:border-zinc-600">
-                            <button wire:click="updateQuantity({{ $item['id'] }}, {{ $item['quantity'] - 1 }})" 
+                            <button wire:click="updateQuantity('{{ $key }}', {{ $item['quantity'] - 1 }})" 
                                     class="p-1 hover:bg-gray-100 dark:hover:bg-zinc-600 rounded-l-md text-gray-600 dark:text-gray-300">
                                 <flux:icon.minus class="w-3 h-3" />
                             </button>
                             <span class="w-8 text-center text-sm font-medium">{{ $item['quantity'] }}</span>
-                            <button wire:click="updateQuantity({{ $item['id'] }}, {{ $item['quantity'] + 1 }})" 
+                            <button wire:click="updateQuantity('{{ $key }}', {{ $item['quantity'] + 1 }})" 
                                     class="p-1 hover:bg-gray-100 dark:hover:bg-zinc-600 rounded-r-md text-gray-600 dark:text-gray-300">
                                 <flux:icon.plus class="w-3 h-3" />
                             </button>
                         </div>
-                        <button wire:click="removeFromCart({{ $item['id'] }})" class="text-red-400 hover:text-red-600 p-1">
+                        <button wire:click="removeFromCart('{{ $key }}')" class="text-red-400 hover:text-red-600 p-1">
                             <flux:icon.trash class="w-4 h-4" />
                         </button>
                     </div>
@@ -83,20 +99,42 @@
         <div class="p-4 bg-zinc-50 dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-700 space-y-4">
             
             <div class="space-y-3">
-                <flux:select wire:model.live="customer_id" placeholder="Seleccionar Cliente" searchable>
-                    @foreach($customers as $customer)
-                        <flux:select.option value="{{ $customer->id }}">{{ $customer->nombre }} {{ $customer->apellido }} ({{ $customer->cedula_rif }})</flux:select.option>
-                    @endforeach
-                </flux:select>
-                @error('customer_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-
-                @if(!empty($customerVehicles) && count($customerVehicles) > 0)
-                    <flux:select wire:model="vehicle_id" placeholder="Seleccionar Vehículo (Opcional)">
-                        <flux:select.option value="">Ninguno / No Aplica</flux:select.option>
-                        @foreach($customerVehicles as $vehicle)
-                            <flux:select.option value="{{ $vehicle->id }}">{{ $vehicle->marca }} {{ $vehicle->modelo }} ({{ $vehicle->placa }})</flux:select.option>
+                @if($order_id)
+                    @php
+                        $activeOrder = \App\Models\ServiceOrder::find($order_id);
+                    @endphp
+                    @if($activeOrder)
+                        <div class="p-3 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 rounded-lg space-y-2">
+                            <div class="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
+                                <flux:icon.user class="w-4 h-4" />
+                                <span class="text-sm font-semibold">Cliente:</span>
+                                <span class="text-sm">{{ $activeOrder->customer?->nombre }} {{ $activeOrder->customer?->apellido }}</span>
+                            </div>
+                            @if($activeOrder->vehicle)
+                                <div class="flex items-center gap-2 text-indigo-700 dark:text-indigo-300 border-t border-indigo-100 dark:border-indigo-800 pt-2">
+                                    <flux:icon.truck class="w-4 h-4" />
+                                    <span class="text-sm font-semibold">Vehículo:</span>
+                                    <span class="text-sm">{{ $activeOrder->vehicle->placa }} ({{ $activeOrder->vehicle->modelo }})</span>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+                @else
+                    <flux:select wire:model.live="customer_id" placeholder="Seleccionar Cliente" searchable>
+                        @foreach($customers as $customer)
+                            <flux:select.option value="{{ $customer->id }}">{{ $customer->nombre }} {{ $customer->apellido }} ({{ $customer->cedula_rif }})</flux:select.option>
                         @endforeach
                     </flux:select>
+                    @error('customer_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+
+                    @if(!empty($customerVehicles) && count($customerVehicles) > 0)
+                        <flux:select wire:model="vehicle_id" placeholder="Seleccionar Vehículo (Opcional)">
+                            <flux:select.option value="">Ninguno / No Aplica</flux:select.option>
+                            @foreach($customerVehicles as $vehicle)
+                                <flux:select.option value="{{ $vehicle->id }}">{{ $vehicle->marca }} {{ $vehicle->modelo }} ({{ $vehicle->placa }})</flux:select.option>
+                            @endforeach
+                        </flux:select>
+                    @endif
                 @endif
                 
                 <flux:select wire:model="payment_method_id" placeholder="Método de Pago">
@@ -107,8 +145,8 @@
                 @error('payment_method_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
 
                 <div class="grid grid-cols-2 gap-3">
-                    <flux:input wire:model.live="discount_percentage" type="number" min="0" max="100" label="Descuento (%)" placeholder="0%" />
-                    <flux:input wire:model.live="paid_amount" type="number" step="0.01" label="Monto Pagado" placeholder="0.00" />
+                    <flux:input wire:model.live="discount_percentage" type="number" min="0" max="100" label="Descuento (%)" placeholder="0%" onfocus="if(this.value=='0'){this.value=''}" />
+                    <flux:input wire:model.live="paid_amount" type="number" step="0.01" label="Monto Pagado" placeholder="0.00" onfocus="if(this.value=='0'){this.value=''}" />
                 </div>
 
             <div class="pt-4 border-t border-zinc-200 dark:border-zinc-700 space-y-2">

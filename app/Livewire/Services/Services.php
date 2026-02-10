@@ -20,6 +20,8 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Select;
+use App\Models\Inventory;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -83,11 +85,18 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                                             ->label('Cantidad')
                                             ->numeric()
                                             ->default(0)
+                                            ->extraInputAttributes(['onfocus' => "if(this.value=='0'){this.value=''}"])
                                             ->required(),
+
                                         Toggle::make('estado')
                                             ->label('Activo')
                                             ->default(true)
                                             ->onColor('success'),
+                                        Select::make('inventory_id')
+                                            ->label('Producto del Inventario')
+                                            ->options(Inventory::query()->pluck('nombreProducto', 'id'))
+                                            ->searchable()
+                                            ->preload(),
                                     ]),
                                 Textarea::make('descripcion')
                                     ->label('Descripción del Servicio')
@@ -137,9 +146,16 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                                         TextInput::make('cantidad')
                                             ->label('Cantidad')
                                             ->numeric()
+                                            ->extraInputAttributes(['onfocus' => "if(this.value=='0'){this.value=''}"])
                                             ->required(),
+
                                         Toggle::make('estado')
                                             ->onColor('success'),
+                                        Select::make('inventory_id')
+                                            ->label('Producto del Inventario')
+                                            ->options(Inventory::query()->pluck('nombreProducto', 'id'))
+                                            ->searchable()
+                                            ->preload(),
                                     ]),
                                 Textarea::make('descripcion')
                                     ->rows(3),

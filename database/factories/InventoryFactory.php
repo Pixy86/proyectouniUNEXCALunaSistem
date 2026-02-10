@@ -20,7 +20,6 @@ class InventoryFactory extends Factory
         return [
             'nombreProducto' => $this->faker->words(3, true),
             'descripcion' => $this->faker->sentence(),
-            'sku' => $this->faker->unique()->bothify('PROD-####-????'),
             'stockActual' => $this->faker->numberBetween(10, 1000),
             'estado' => true,
         ];

@@ -35,7 +35,7 @@ class ListAuditLogs extends Component implements HasActions, HasSchemas, HasTabl
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn (): Builder => AuditLog::query()->with('user'))
+            ->query(fn (): Builder => AuditLog::query()->with('user')->limit(100))
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('created_at')
@@ -118,7 +118,7 @@ class ListAuditLogs extends Component implements HasActions, HasSchemas, HasTabl
                 //
             ])
             ->striped()
-            ->paginated([10, 25, 50, 100]);
+            ->paginated([10]);
     }
 
     public function render(): View

@@ -13,6 +13,7 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Repeater;
@@ -80,6 +81,7 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                         TextInput::make('cedula_rif')
                                             ->label('Cédula / RIF')
                                             ->required()
+                                            ->numeric()
                                             ->unique('customers', 'cedula_rif'),
                                         TextInput::make('nombre')
                                             ->required(),
@@ -149,9 +151,16 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                                     ->required(),
                                                 TextInput::make('color')
                                                     ->required(),
-                                                TextInput::make('tipo_vehiculo')
+                                                Select::make('tipo_vehiculo')
                                                     ->label('Tipo de Vehículo')
-                                                    ->required(),
+                                                    ->options([
+                                                        'Moto' => 'Moto',
+                                                        'Carro' => 'Carro',
+                                                        'Camioneta' => 'Camioneta',
+                                                        'Camioneta extra grande' => 'Camioneta extra grande',
+                                                        'Otros' => 'Otros',
+                                                    ])
+                                                    ->required(), // aca
                                                 Toggle::make('estado')
                                                     ->label('Activo')
                                                     ->default(true)
@@ -188,6 +197,7 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                 \Filament\Schemas\Components\Grid::make(2)
                                     ->schema([
                                         TextInput::make('cedula_rif')
+                                            ->numeric()
                                             ->required(),
                                         TextInput::make('nombre')
                                             ->required(),

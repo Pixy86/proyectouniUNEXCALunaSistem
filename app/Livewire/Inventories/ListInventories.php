@@ -43,11 +43,6 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
                     ->label('Nombre del Producto')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('sku')
-                    ->label('SKU / Código')
-                    ->badge()
-                    ->searchable()
-                    ->sortable(),
                 TextColumn::make('stockActual')
                     ->label('Stock Actual')
                     ->numeric()
@@ -79,11 +74,6 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
                                             ->label('Nombre del Producto')
                                             ->required()
                                             ->maxLength(255),
-                                        TextInput::make('sku')
-                                            ->label('SKU / Código')
-                                            ->required()
-                                            ->unique(ignoreRecord: true)
-                                            ->maxLength(100),
                                         TextInput::make('stockActual')
                                             ->label('Stock Inicial')
                                             ->numeric()
@@ -114,9 +104,6 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
                                         Placeholder::make('nombreProducto')
                                             ->label('Nombre')
                                             ->content(fn ($record) => $record->nombreProducto),
-                                        Placeholder::make('sku')
-                                            ->label('SKU')
-                                            ->content(fn ($record) => $record->sku),
                                         Placeholder::make('stockActual')
                                             ->label('Stock')
                                             ->content(fn ($record) => $record->stockActual),
@@ -145,10 +132,6 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
                                         TextInput::make('nombreProducto')
                                             ->label('Nombre del Producto')
                                             ->required(),
-                                        TextInput::make('sku')
-                                            ->label('SKU / Código')
-                                            ->required()
-                                            ->unique(ignoreRecord: true),
                                         TextInput::make('stockActual')
                                             ->label('Stock Actual')
                                             ->numeric()

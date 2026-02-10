@@ -2,6 +2,7 @@
 
 namespace App\Actions\Fortify;
 
+use App\Models\AuditLog;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -30,10 +31,19 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
-        return User::create([
+        $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => $input['password'],
         ]);
+
+        AuditLog::registrar(
+            accion: AuditLog::ACCION_CREATE,
+            descripcion: "Se ha registrado un nuevo usuario: {$user->name} ({$user->email})",
+            modelo: 'User',
+            modeloId: $user->id
+        );
+
+        return $user;
     }
 }
