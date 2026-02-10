@@ -63,6 +63,7 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
             ->headerActions([
                 CreateAction::make()
                     ->label('Nuevo Producto')
+                    ->modalHeading('Crear Inventario')
                     ->icon('heroicon-m-plus')
                     ->modalWidth('2xl')
                     ->form([
@@ -88,7 +89,8 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
                                     ->label('Descripción')
                                     ->rows(3),
                             ]),
-                    ]),
+                    ])
+                    ->closeModalByClickingAway(false),
             ])
             ->actions([
                 ViewAction::make()
@@ -149,7 +151,8 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
                                     ->label('Descripción')
                                     ->rows(3),
                             ]),
-                    ]),
+                    ])
+                    ->closeModalByClickingAway(false),
                 DeleteAction::make()
                     ->label('')
                     ->tooltip('Eliminar')
@@ -165,9 +168,11 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
 
     public function mount(): void
     {
+        /*
         if (Inventory::count() === 0) {
             Inventory::factory(10)->create();
         }
+        */
     }
 
     public function render(): View

@@ -123,7 +123,8 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                             ->success()
                             ->send();
                     })
-                    ->modalWidth('2xl'),
+                    ->modalWidth('2xl')
+                    ->closeModalByClickingAway(false),
             ])
             ->actions([
                 Action::make('view')
@@ -236,7 +237,8 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                             ->title('Orden Actualizada')
                             ->success()
                             ->send();
-                    }),
+                    })
+                    ->closeModalByClickingAway(false),
                 Action::make('cancel')
                     ->label('')
                     ->tooltip('Cancelar Orden')

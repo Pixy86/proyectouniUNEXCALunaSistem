@@ -27,7 +27,7 @@
             </div>
 
             <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Plataforma')" class="nav-group grid">
+                <flux:navlist.group :heading="__('Inicio')" class="nav-group grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Tablero') }}</span>
                     </flux:navlist.item>
@@ -35,12 +35,12 @@
             </flux:navlist>
 
             <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Maestros y Recursos')" class="nav-group grid">
-                    <flux:navlist.item icon="archive-box" :href="route('inventories.index')" :current="request()->routeIs('inventories.index')" wire:navigate>
-                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Inventarios') }}</span>
+                <flux:navlist.group :heading="__('Operaciones')" class="nav-group grid">
+                    <flux:navlist.item icon="clipboard-document-list" :href="route('service-orders.index')" :current="request()->routeIs('service-orders.index')" wire:navigate>
+                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Órdenes de Servicio') }}</span>
                     </flux:navlist.item>
-                    <flux:navlist.item icon="wrench-screwdriver" :href="route('services.index')" :current="request()->routeIs('services.index')" wire:navigate>
-                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Servicios') }}</span>
+                    <flux:navlist.item icon="presentation-chart-line" :href="route('venta.index')" :current="request()->routeIs('venta.index')" wire:navigate>
+                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Venta') }}</span>
                     </flux:navlist.item>
                 </flux:navlist.group>
 
@@ -55,12 +55,12 @@
                     @endif
                 </flux:navlist.group>
 
-                <flux:navlist.group :heading="__('Operaciones')" class="nav-group grid">
-                    <flux:navlist.item icon="presentation-chart-line" :href="route('pos.index')" :current="request()->routeIs('pos.index')" wire:navigate>
-                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Venta') }}</span>
+                <flux:navlist.group :heading="__('Maestros y Recursos')" class="nav-group grid">
+                    <flux:navlist.item icon="archive-box" :href="route('inventories.index')" :current="request()->routeIs('inventories.index')" wire:navigate>
+                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Inventarios') }}</span>
                     </flux:navlist.item>
-                    <flux:navlist.item icon="clipboard-document-list" :href="route('service-orders.index')" :current="request()->routeIs('service-orders.index')" wire:navigate>
-                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Órdenes de Servicio') }}</span>
+                    <flux:navlist.item icon="wrench-screwdriver" :href="route('services.index')" :current="request()->routeIs('services.index')" wire:navigate>
+                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Servicios') }}</span>
                     </flux:navlist.item>
                 </flux:navlist.group>
 
@@ -185,5 +185,95 @@
         @livewire('notifications')
         @filamentScripts
         @fluxScripts
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const dirtyModals = new Set();
+                
+                // Detectar cambios en inputs dentro de modales
+                document.body.addEventListener('input', (e) => {
+                    const modal = e.target.closest('[role="dialog"]');
+                    if (modal) {
+                        dirtyModals.add(modal);
+                    }
+                });
+
+                // Limpiar estado sucio cuando se envía un formulario (asumiendo que guardar es exitoso o intencional)
+                document.body.addEventListener('submit', (e) => {
+                    const modal = e.target.closest('[role="dialog"]');
+                    if (modal) {
+                        dirtyModals.delete(modal);
+                    }
+                });
+
+                // Función para verificar y confirmar cierre
+                const checkModalClose = (e, modalElement) => {
+                    if (!modalElement) return;
+                    
+                    // Si el modal está sucio y visible
+                    if (dirtyModals.has(modalElement) && modalElement.offsetParent !== null) {
+                        // Usar confirmación nativa del navegador que bloquea la ejecución
+                        if (!confirm('¿Desea salir sin guardar los datos?')) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.stopImmediatePropagation();
+                            return false;
+                        } else {
+                            dirtyModals.delete(modalElement);
+                            return true;
+                        }
+                    }
+                    return true;
+                };
+
+                // Interceptar clicks fuera del modal (Backdrop click)
+                // Usamos captura (tercer argumento true) para interceptar antes que Alpine/Flux
+                window.addEventListener('mousedown', (e) => {
+                    const visibleModal = document.querySelector('[role="dialog"]:not([style*="display: none"])');
+                    if (!visibleModal) return;
+
+                    // Si el click es DENTRO del modal pero FUERA del panel de contenido
+                    // Asumimos que el panel de contenido tiene alguna clase específica o es el primer hijo directo relevante
+                    // Flux suele tener un backdrop que envuelve o está detrás.
+                    // Si el target es el backdrop mismo...
+                    
+                    // Identificamos el panel interior (usualmente bg-white o similar)
+                    const modalPanel = visibleModal.querySelector('[data-flux-modal-panel]') || 
+                                     visibleModal.querySelector('.bg-white') || 
+                                     visibleModal.querySelector('.bg-zinc-900');
+
+                    if (modalPanel) {
+                        // Si el click NO es en el panel y SÍ es en el contenedor del modal (backdrop)
+                        if (!modalPanel.contains(e.target) && visibleModal.contains(e.target)) {
+                            checkModalClose(e, visibleModal);
+                        }
+                    }
+                }, true);
+
+                // Interceptar tecla Escape
+                window.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        const visibleModal = document.querySelector('[role="dialog"]:not([style*="display: none"])');
+                        if (visibleModal) {
+                            checkModalClose(e, visibleModal);
+                        }
+                    }
+                }, true);
+
+                // Limpiar referencia de modales que ya no existen en el DOM
+                setInterval(() => {
+                    dirtyModals.forEach(modal => {
+                        if (!document.body.contains(modal) || modal.style.display === 'none') {
+                            dirtyModals.delete(modal);
+                        }
+                    });
+                }, 1000);
+                
+                // Limpiar todo al navegar con livewire (SPA navigation)
+                document.addEventListener('livewire:navigated', () => {
+                    dirtyModals.clear();
+                });
+            });
+        </script>
     </body>
 </html>

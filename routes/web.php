@@ -45,6 +45,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function (): void {
     // Ventas y Facturación
     Route::get('/manage-sales', ListSales::class)->name('sales.index');
+    Route::get('/sales/report/pdf', [App\Http\Controllers\ReportController::class, 'generateSalesReport'])->name('sales.report.pdf');
 
     // Catálogo de Servicios
     Route::get('/manage-services', Services::class)->name('services.index');
@@ -67,8 +68,8 @@ Route::middleware(['auth'])->group(function (): void {
     // Órdenes de Servicio
     Route::get('/service-orders', \App\Livewire\ServiceOrders\ListServiceOrders::class)->name('service-orders.index');
 
-    // Venta (POS)
-    Route::get('/pos', \App\Livewire\POS::class)->name('pos.index');
+    // Venta
+    Route::get('/venta', \App\Livewire\Venta::class)->name('venta.index');
 });
 
 // Ruta temporal para solucionar problemas de base de datos

@@ -36,7 +36,7 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
     public function table(Table $table): Table
     {
         return $table
-            // Listado de servicios disponibles en el taller
+            // Listado de servicios disponibles en auto lavado
             ->query(fn (): Builder => Service::query())
             ->columns([
                 TextColumn::make('nombre')
@@ -110,7 +110,8 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                             ->success()
                             ->send();
                     })
-                    ->modalWidth('2xl'),
+                    ->modalWidth('2xl')
+                    ->closeModalByClickingAway(false),
             ])
             ->actions([
                 Action::make('toggleEstado')
@@ -160,7 +161,8 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                                 Textarea::make('descripcion')
                                     ->rows(3),
                             ]),
-                    ]),
+                    ])
+                    ->closeModalByClickingAway(false),
                 DeleteAction::make()
                     ->label('')
                     ->tooltip('Eliminar')

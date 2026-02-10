@@ -49,7 +49,8 @@ class DatabaseSeeder extends Seeder
             'estado' => true,
         ]);
 
-        // Generamos datos maestros para el funcionamiento del taller
+        /*
+        // Generamos datos maestros para el funcionamiento del autolavado
 
         \App\Models\PaymentMethod::factory(5)->create();
         $inventories = Inventory::factory(20)->create();
@@ -90,5 +91,6 @@ class DatabaseSeeder extends Seeder
                 ->has(\App\Models\SalesItem::factory()->count(3), 'items')
                 ->create();
         });
+        */
     }
 }

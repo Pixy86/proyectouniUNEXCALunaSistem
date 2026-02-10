@@ -55,7 +55,11 @@ class ListSales extends Component implements HasActions, HasSchemas, HasTable
                 //
             ])
             ->headerActions([
-                //
+                \Filament\Actions\Action::make('printReport')
+                    ->label('Imprimir Reporte')
+                    ->icon('heroicon-o-printer')
+                    ->url(route('sales.report.pdf'))
+                    ->openUrlInNewTab(),
             ])
             ->recordActions([
                 //

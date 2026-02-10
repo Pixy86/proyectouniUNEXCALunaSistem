@@ -122,7 +122,8 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                             ->success()
                             ->send();
                     })
-                    ->modalWidth('2xl'),
+                    ->modalWidth('2xl')
+                    ->closeModalByClickingAway(false),
             ])
             ->actions([
                 Action::make('vehicles')
@@ -171,7 +172,8 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                     ->collapsible(),
                             ]),
                     ])
-                    ->modalWidth('4xl'),
+                    ->modalWidth('4xl')
+                    ->closeModalByClickingAway(false),
                 Action::make('toggleEstado')
                     ->label('')
                     ->tooltip(fn (Customer $record): string => $record->estado ? 'Desactivar' : 'Activar')
@@ -213,7 +215,9 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                             ->onColor('success'),
                                     ]),
                             ]),
-                    ]),
+
+                    ])
+                    ->closeModalByClickingAway(false),
                 DeleteAction::make()
                     ->label('')
                     ->tooltip('Eliminar')

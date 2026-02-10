@@ -1,0 +1,17 @@
+[32m./composer.json has been updated[39m
+[32mRunning composer update barryvdh/laravel-dompdf[39m
+[32mLoading composer repositories with package information[39m
+[32mUpdating dependencies[39m
+[37;41mYour requirements could not be resolved to an installable set of packages.[39;49m
+
+  Problem 1
+    - pestphp/pest is locked to version v4.1.3 and an update of this package was not requested.
+    - pestphp/pest v4.1.3 requires phpunit/phpunit ^12.4.1 -> found phpunit/phpunit[12.4.1, ..., 12.5.8] but these were not loaded, because they are affected by security advisories. To ignore the advisories, add ("PKSA-z3gr-8qht-p93v") to the audit "ignore" config. To turn the feature off entirely, you can set "block-insecure" to false in your "audit" config.
+  Problem 2
+    - pestphp/pest-plugin-laravel is locked to version v4.0.0 and an update of this package was not requested.
+    - pestphp/pest v4.1.3 requires phpunit/phpunit ^12.4.1 -> found phpunit/phpunit[12.4.1, ..., 12.5.8] but these were not loaded, because they are affected by security advisories. To ignore the advisories, add ("PKSA-z3gr-8qht-p93v") to the audit "ignore" config. To turn the feature off entirely, you can set "block-insecure" to false in your "audit" config.
+    - pestphp/pest-plugin-laravel v4.0.0 requires pestphp/pest ^4.0.0 -> satisfiable by pestphp/pest[v4.1.3].
+
+You can also try re-running composer require with an explicit version constraint, e.g. "composer require barryvdh/laravel-dompdf:*" to figure out if any version is installable, or "composer require barryvdh/laravel-dompdf:^2.1" if you know which you need.
+
+[37;41mInstallation failed, reverting ./composer.json and ./composer.lock to their original content.[39;49m

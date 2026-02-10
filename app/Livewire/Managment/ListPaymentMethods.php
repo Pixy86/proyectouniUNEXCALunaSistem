@@ -89,7 +89,9 @@ class ListPaymentMethods extends Component implements HasActions, HasSchemas, Ha
                             ->success()
                             ->send();
                     })
-                    ->modalWidth('2xl'),
+
+                    ->modalWidth('2xl')
+                    ->closeModalByClickingAway(false),
             ])
             ->actions([
                 // Cambiar disponibilidad del método de pago sin eliminarlo
@@ -126,7 +128,9 @@ class ListPaymentMethods extends Component implements HasActions, HasSchemas, Ha
                                 Textarea::make('descripcion')
                                     ->rows(3),
                             ]),
-                    ]),
+
+                    ])
+                    ->closeModalByClickingAway(false),
                 DeleteAction::make()
                     ->label('')
                     ->tooltip('Eliminar')
