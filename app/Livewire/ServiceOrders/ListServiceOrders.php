@@ -98,6 +98,8 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                     ->icon('heroicon-m-plus')
                     ->color('primary')
                     ->form($this->getOrderForm())
+                    ->modalSubmitActionLabel('Guardar Orden')
+                    ->modalCancelActionLabel('Cancelar')
                     ->action(function (array $data) {
                         $order = ServiceOrder::create([
                             'customer_id' => $data['customer_id'],
@@ -204,7 +206,10 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                     ->color('info')
                     ->iconButton()
                     ->visible(fn (ServiceOrder $record): bool => $record->status === ServiceOrder::STATUS_ABIERTA)
+                    ->visible(fn (ServiceOrder $record): bool => $record->status === ServiceOrder::STATUS_ABIERTA)
                     ->form($this->getOrderForm(true))
+                    ->modalSubmitActionLabel('Actualizar Orden')
+                    ->modalCancelActionLabel('Cancelar')
                     ->fillForm(fn (ServiceOrder $record): array => [
                         'customer_id' => $record->customer_id,
                         'vehicle_id' => $record->vehicle_id,
@@ -273,6 +278,7 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                         ->schema([
                             Select::make('customer_id')
                                 ->label('Cliente')
+                                ->placeholder('Seleccionar cliente...')
                                 ->options(Customer::query()->get()->mapWithKeys(fn ($c) => [$c->id => "{$c->nombre} {$c->apellido} ({$c->cedula_rif})"]))
                                 ->searchable()
                                 ->required()
@@ -280,6 +286,7 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                                 ->afterStateUpdated(fn (callable $set) => $set('vehicle_id', null)),
                             Select::make('vehicle_id')
                                 ->label('Vehículo')
+                                ->placeholder('Seleccionar vehículo...')
                                 ->options(fn (callable $get) => Vehicle::where('customer_id', $get('customer_id'))->get()->mapWithKeys(fn ($v) => [$v->id => "{$v->marca} {$v->modelo} ({$v->placa})"]))
                                 ->searchable()
                                 ->required(),
@@ -292,6 +299,7 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                         ->schema([
                             Select::make('service_id')
                                 ->label('Servicio')
+                                ->placeholder('Seleccionar servicio...')
                                 ->options(Service::where('estado', true)->get()->mapWithKeys(fn ($s) => [
                                     $s->id => "{$s->nombre} - \${$s->precio}" . ($s->inventory && $s->inventory->stockActual > 0 ? ' ✓' : ' ✗ Sin Stock')
                                 ]))
