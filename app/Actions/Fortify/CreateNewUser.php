@@ -29,7 +29,7 @@ class CreateNewUser implements CreatesNewUsers
                 Rule::unique(User::class),
             ],
             'password' => $this->passwordRules(),
-        ])->validateWithBag('registration', [
+        ])->validate([
             'name.required' => 'El nombre es obligatorio.',
             'name.regex' => 'El nombre no puede contener números ni caracteres especiales.',
             'name.string' => 'El nombre debe ser un texto válido.',
