@@ -145,7 +145,6 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                                 TextInput::make('placa')
                                                     ->label('Placa')
                                                     ->required()
-                                                    ->unique('vehicles', 'placa', ignoreRecord: true)
                                                     ->placeholder('Ej: ABC123'),
                                                 TextInput::make('marca')
                                                     ->label('Marca')
