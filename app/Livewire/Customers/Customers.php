@@ -144,16 +144,21 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                             ->schema([
                                                 TextInput::make('placa')
                                                     ->label('Placa')
-                                                    ->required(),
+                                                    ->required()
+                                                    ->unique('vehicles', 'placa', ignoreRecord: true)
+                                                    ->placeholder('Ej: ABC123'),
                                                 TextInput::make('marca')
                                                     ->label('Marca')
-                                                    ->required(),
+                                                    ->required()
+                                                    ->placeholder('Ej: Toyota'),
                                                 TextInput::make('modelo')
                                                     ->label('Modelo')
-                                                    ->required(),
+                                                    ->required()
+                                                    ->placeholder('Ej: Corolla'),
                                                 TextInput::make('color')
                                                     ->label('Color')
-                                                    ->required(),
+                                                    ->required()
+                                                    ->placeholder('Ej: Blanco'),
                                                 Select::make('tipo_vehiculo')
                                                     ->label('Tipo de Vehículo')
                                                     ->options([
@@ -163,7 +168,8 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                                         'Camioneta extra grande' => 'Camioneta extra grande',
                                                         'Otros' => 'Otros',
                                                     ])
-                                                    ->required(),
+                                                    ->required()
+                                                    ->placeholder('Seleccione...'),
                                                 Toggle::make('estado')
                                                     ->label('Activo')
                                                     ->default(true)
@@ -172,21 +178,33 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                     ])
                                     ->itemLabel(fn (array $state): ?string => $state['placa'] ?? 'Nuevo Vehículo')
                                     ->addActionLabel('Agregar Vehículo')
-                                    ->collapsible(),
+                                    ->collapsible()
+                                    ->defaultItems(0),
                             ]),
                     ])
                     ->fillForm(fn (Customer $record): array => [
                         'vehicles' => $record->vehicles->toArray(),
                     ])
                     ->action(function (Customer $record, array $data): void {
-                        $record->vehicles()->delete();
+                        $processedIds = [];
+
                         foreach ($data['vehicles'] as $vehicleData) {
-                            $record->vehicles()->create($vehicleData);
+                            // Usamos updateOrCreate para mantener los registros existentes
+                            // Buscamos por ID si existe, o por placa si es de este cliente
+                            $vehicle = $record->vehicles()->updateOrCreate(
+                                ['id' => $vehicleData['id'] ?? null],
+                                $vehicleData
+                            );
+                            $processedIds[] = $vehicle->id;
                         }
+
+                        // Eliminamos permanentemente los que el usuario quitó en la interfaz
+                        // Usamos forceDelete para que la placa quede libre inmediatamente
+                        $record->vehicles()->whereNotIn('id', $processedIds)->forceDelete();
 
                         Notification::make()
                             ->title('Vehículos Actualizados')
-                            ->body("Se han actualizado los vehículos de {$record->nombre} {$record->apellido}")
+                            ->body("Se han guardado los cambios en los vehículos de {$record->nombre} {$record->apellido}")
                             ->success()
                             ->send();
                     })
