@@ -47,6 +47,10 @@ class FortifyServiceProvider extends ServiceProvider
 
                 return $user;
             }
+
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                Fortify::username() => ['Estas credenciales no coinciden con nuestros registros.'],
+            ]);
         });
     }
 

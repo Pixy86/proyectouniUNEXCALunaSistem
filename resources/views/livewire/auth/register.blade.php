@@ -9,17 +9,22 @@
             @csrf
 
             <!-- Name -->
-            <flux:input
-                name="name"
-                :label="__('Nombre')"
-                type="text"
-                required
-                autofocus
-                autocomplete="name"
-                :placeholder="__('Nombre completo')"
-                pattern="[\pL\s\-']+"
-                title="Solo se permiten letras, espacios, guiones y apóstrofos"
-            />
+            <div>
+                <flux:input
+                    name="name"
+                    :label="__('Nombre')"
+                    type="text"
+                    required
+                    autofocus
+                    autocomplete="name"
+                    :placeholder="__('Nombre completo')"
+                    pattern="[\pL\s\-']+"
+                    title="Solo se permiten letras, espacios, guiones y apóstrofos"
+                />
+                <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                    Solo letras. No se permiten números ni caracteres especiales.
+                </p>
+            </div>
 
             <!-- Email Address -->
             <flux:input
