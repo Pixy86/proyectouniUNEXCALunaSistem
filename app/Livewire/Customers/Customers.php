@@ -139,18 +139,20 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                             ->description(fn (Customer $record): string => "A continuación puede agregar o editar los vehículos pertenecientes a {$record->nombre} {$record->apellido}")
                             ->schema([
                                 Repeater::make('vehicles')
-                                    ->relationship('vehicles')
                                     ->schema([
                                         \Filament\Schemas\Components\Grid::make(2)
                                             ->schema([
                                                 TextInput::make('placa')
-                                                    ->required()
-                                                    ->unique('vehicles', 'placa', ignoreRecord: true),
+                                                    ->label('Placa')
+                                                    ->required(),
                                                 TextInput::make('marca')
+                                                    ->label('Marca')
                                                     ->required(),
                                                 TextInput::make('modelo')
+                                                    ->label('Modelo')
                                                     ->required(),
                                                 TextInput::make('color')
+                                                    ->label('Color')
                                                     ->required(),
                                                 Select::make('tipo_vehiculo')
                                                     ->label('Tipo de Vehículo')
@@ -161,7 +163,7 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                                         'Camioneta extra grande' => 'Camioneta extra grande',
                                                         'Otros' => 'Otros',
                                                     ])
-                                                    ->required(), // aca
+                                                    ->required(),
                                                 Toggle::make('estado')
                                                     ->label('Activo')
                                                     ->default(true)
@@ -169,9 +171,27 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                             ]),
                                     ])
                                     ->itemLabel(fn (array $state): ?string => $state['placa'] ?? 'Nuevo Vehículo')
+                                    ->addActionLabel('Agregar Vehículo')
                                     ->collapsible(),
                             ]),
                     ])
+                    ->fillForm(fn (Customer $record): array => [
+                        'vehicles' => $record->vehicles->toArray(),
+                    ])
+                    ->action(function (Customer $record, array $data): void {
+                        $record->vehicles()->delete();
+                        foreach ($data['vehicles'] as $vehicleData) {
+                            $record->vehicles()->create($vehicleData);
+                        }
+
+                        Notification::make()
+                            ->title('Vehículos Actualizados')
+                            ->body("Se han actualizado los vehículos de {$record->nombre} {$record->apellido}")
+                            ->success()
+                            ->send();
+                    })
+                    ->modalSubmitActionLabel('Guardar Cambios')
+                    ->modalCancelActionLabel('Cancelar')
                     ->modalWidth('4xl')
                     ->closeModalByClickingAway(false),
                 Action::make('toggleEstado')
