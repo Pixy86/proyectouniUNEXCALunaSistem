@@ -220,7 +220,7 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                     ->iconButton(),
             ])
             ->bulkActions([
-                \Filament\Tables\Actions\BulkActionGroup::make([
+                \Filament\Actions\BulkActionGroup::make([
                     \Filament\Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
