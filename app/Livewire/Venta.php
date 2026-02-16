@@ -246,9 +246,16 @@ class Venta extends Component
             $transactionResult = \Illuminate\Support\Facades\DB::transaction(function () {
                 // Verificación de stock antes de procesar
                 foreach ($this->cart as $item) {
-                    $service = Service::with('inventory')->find($item['id']);
-                    if (!$service || ($service->inventory && $service->inventory->stockActual < $item['quantity'])) {
-                        throw new \Exception("El servicio '{$item['name']}' no tiene suficiente inventario disponible.");
+                    $service = Service::with('inventories')->find($item['id']);
+                    if (!$service) {
+                        throw new \Exception("El servicio '{$item['name']}' no existe.");
+                    }
+                    // Verificar stock de cada producto asociado al servicio
+                    foreach ($service->inventories as $inventory) {
+                        $requiredQty = $inventory->pivot->quantity * $item['quantity'];
+                        if ($inventory->stockActual < $requiredQty) {
+                            throw new \Exception("El producto '{$inventory->nombreProducto}' no tiene suficiente inventario para el servicio '{$item['name']}'. Disponible: {$inventory->stockActual}, Requerido: {$requiredQty}");
+                        }
                     }
                 }
 
@@ -277,14 +284,12 @@ class Venta extends Component
                         $orderIds[] = $item['order_id'];
                     }
 
-                    // Decrementar inventario
-                    $service = Service::find($item['id']);
+                    // Decrementar inventario de todos los productos del servicio
+                    $service = Service::with('inventories')->find($item['id']);
                     if ($service) {
-                        if ($service->inventory) {
-                            $service->inventory->decrement('stockActual', $item['quantity']);
-                        }
-                        if ($service->cantidad > 0) {
-                            $service->decrement('cantidad', $item['quantity']);
+                        foreach ($service->inventories as $inventory) {
+                            $decrementQty = $inventory->pivot->quantity * $item['quantity'];
+                            $inventory->decrement('stockActual', $decrementQty);
                         }
                     }
                 }

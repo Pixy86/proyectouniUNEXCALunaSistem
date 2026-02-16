@@ -6,8 +6,6 @@ use App\Models\Service;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\CreateAction;
-use Filament\Actions\BulkActionGroup;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
@@ -21,6 +19,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Repeater;
 use App\Models\Inventory;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\View\View;
@@ -33,11 +32,63 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
     use InteractsWithTable;
     use InteractsWithSchemas;
 
+    /**
+     * Formulario compartido para crear y editar servicios.
+     */
+    protected function getServiceForm(): array
+    {
+        return [
+            \Filament\Schemas\Components\Section::make('Información del Servicio')
+                ->schema([
+                    \Filament\Schemas\Components\Grid::make(2)
+                        ->schema([
+                            TextInput::make('nombre')
+                                ->required()
+                                ->maxLength(255),
+                            TextInput::make('precio')
+                                ->numeric()
+                                ->prefix('$')
+                                ->required(),
+                            Toggle::make('estado')
+                                ->label('Activo')
+                                ->default(true)
+                                ->onColor('success'),
+                        ]),
+                    Textarea::make('descripcion')
+                        ->label('Descripción del Servicio')
+                        ->rows(3),
+                ]),
+            \Filament\Schemas\Components\Section::make('Productos del Inventario')
+                ->description('Selecciona los productos que este servicio utiliza y la cantidad requerida de cada uno.')
+                ->schema([
+                    Repeater::make('products')
+                        ->label('')
+                        ->schema([
+                            Select::make('inventory_id')
+                                ->label('Producto')
+                                ->options(Inventory::where('estado', true)->pluck('nombreProducto', 'id'))
+                                ->searchable()
+                                ->preload()
+                                ->required(),
+                            TextInput::make('quantity')
+                                ->label('Cantidad requerida')
+                                ->numeric()
+                                ->default(1)
+                                ->minValue(1)
+                                ->required(),
+                        ])
+                        ->columns(2)
+                        ->minItems(1)
+                        ->defaultItems(1)
+                        ->addActionLabel('Agregar Producto'),
+                ]),
+        ];
+    }
+
     public function table(Table $table): Table
     {
         return $table
-            // Listado de servicios disponibles en auto lavado
-            ->query(fn (): Builder => Service::query())
+            ->query(fn (): Builder => Service::query()->with('inventories'))
             ->columns([
                 TextColumn::make('nombre')
                     ->label('Nombre del Servicio')
@@ -51,10 +102,20 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                     ->label('Precio')
                     ->money('USD')
                     ->sortable(),
-                TextColumn::make('cantidad')
-                    ->label('Cantidad')
+                TextColumn::make('inventories')
+                    ->label('Productos')
+                    ->formatStateUsing(fn (Service $record): string =>
+                        $record->inventories->map(fn ($inv) =>
+                            $inv->nombreProducto . ' (x' . $inv->pivot->quantity . ')'
+                        )->join(', ') ?: 'Sin productos'
+                    )
+                    ->wrap(),
+                TextColumn::make('cantidad_disponible')
+                    ->label('Cantidad Disponible')
+                    ->state(fn (Service $record): int => $record->cantidad)
                     ->badge()
-                    ->sortable(),
+                    ->color(fn (int $state): string => $state > 0 ? 'success' : 'danger')
+                    ->sortable(false),
                 IconColumn::make('estado')
                     ->label('Estado')
                     ->boolean()
@@ -64,47 +125,28 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                 //
             ])
             ->headerActions([
-                // Creación de servicios (No incluye duración, se enfoca en descripción)
                 Action::make('create')
                     ->label('Nuevo Servicio')
                     ->icon('heroicon-m-plus')
                     ->color('primary')
-                    ->form([
-                        \Filament\Schemas\Components\Section::make('Información del Servicio')
-                            ->schema([
-                                \Filament\Schemas\Components\Grid::make(2)
-                                    ->schema([
-                                        TextInput::make('nombre')
-                                            ->required()
-                                            ->maxLength(255),
-                                        TextInput::make('precio')
-                                            ->numeric()
-                                            ->prefix('$')
-                                            ->required(),
-                                        TextInput::make('cantidad')
-                                            ->label('Cantidad')
-                                            ->numeric()
-                                            ->default(0)
-                                            ->extraInputAttributes(['onfocus' => "if(this.value=='0'){this.value=''}"])
-                                            ->required(),
-
-                                        Toggle::make('estado')
-                                            ->label('Activo')
-                                            ->default(true)
-                                            ->onColor('success'),
-                                        Select::make('inventory_id')
-                                            ->label('Producto del Inventario')
-                                            ->options(Inventory::query()->pluck('nombreProducto', 'id'))
-                                            ->searchable()
-                                            ->preload(),
-                                    ]),
-                                Textarea::make('descripcion')
-                                    ->label('Descripción del Servicio')
-                                    ->rows(3),
-                            ]),
-                    ])
+                    ->form($this->getServiceForm())
                     ->action(function (array $data) {
-                        Service::create($data);
+                        $service = Service::create([
+                            'nombre' => $data['nombre'],
+                            'precio' => $data['precio'],
+                            'estado' => $data['estado'] ?? true,
+                            'descripcion' => $data['descripcion'] ?? null,
+                        ]);
+
+                        // Sincronizar productos del inventario
+                        $pivotData = [];
+                        foreach ($data['products'] as $product) {
+                            $pivotData[$product['inventory_id']] = [
+                                'quantity' => $product['quantity'],
+                            ];
+                        }
+                        $service->inventories()->sync($pivotData);
+
                         Notification::make()
                             ->title('Servicio Creado')
                             ->success()
@@ -128,40 +170,48 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                             ->success()
                             ->send();
                     }),
-                EditAction::make()
+                Action::make('edit')
                     ->label('')
                     ->tooltip('Editar')
+                    ->icon('heroicon-m-pencil')
+                    ->color('info')
                     ->size('lg')
                     ->iconButton()
-                    ->form([
-                        \Filament\Schemas\Components\Section::make('Actualizar Servicio')
-                            ->schema([
-                                \Filament\Schemas\Components\Grid::make(2)
-                                    ->schema([
-                                        TextInput::make('nombre')
-                                            ->required(),
-                                        TextInput::make('precio')
-                                            ->numeric()
-                                            ->prefix('$')
-                                            ->required(),
-                                        TextInput::make('cantidad')
-                                            ->label('Cantidad')
-                                            ->numeric()
-                                            ->extraInputAttributes(['onfocus' => "if(this.value=='0'){this.value=''}"])
-                                            ->required(),
-
-                                        Toggle::make('estado')
-                                            ->onColor('success'),
-                                        Select::make('inventory_id')
-                                            ->label('Producto del Inventario')
-                                            ->options(Inventory::query()->pluck('nombreProducto', 'id'))
-                                            ->searchable()
-                                            ->preload(),
-                                    ]),
-                                Textarea::make('descripcion')
-                                    ->rows(3),
-                            ]),
+                    ->modalHeading('Editar Servicio')
+                    ->form($this->getServiceForm())
+                    ->fillForm(fn (Service $record): array => [
+                        'nombre' => $record->nombre,
+                        'precio' => $record->precio,
+                        'estado' => $record->estado,
+                        'descripcion' => $record->descripcion,
+                        'products' => $record->inventories->map(fn ($inv) => [
+                            'inventory_id' => $inv->id,
+                            'quantity' => $inv->pivot->quantity,
+                        ])->toArray(),
                     ])
+                    ->action(function (Service $record, array $data) {
+                        $record->update([
+                            'nombre' => $data['nombre'],
+                            'precio' => $data['precio'],
+                            'estado' => $data['estado'] ?? true,
+                            'descripcion' => $data['descripcion'] ?? null,
+                        ]);
+
+                        // Sincronizar productos
+                        $pivotData = [];
+                        foreach ($data['products'] as $product) {
+                            $pivotData[$product['inventory_id']] = [
+                                'quantity' => $product['quantity'],
+                            ];
+                        }
+                        $record->inventories()->sync($pivotData);
+
+                        Notification::make()
+                            ->title('Servicio Actualizado')
+                            ->success()
+                            ->send();
+                    })
+                    ->modalWidth('2xl')
                     ->closeModalByClickingAway(false),
                 DeleteAction::make()
                     ->label('')
@@ -169,9 +219,9 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                     ->size('lg')
                     ->iconButton(),
             ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    //
+            ->bulkActions([
+                \Filament\Tables\Actions\BulkActionGroup::make([
+                    \Filament\Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -181,3 +231,4 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
         return view('livewire.services.services');
     }
 }
+

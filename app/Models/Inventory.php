@@ -16,4 +16,14 @@ class Inventory extends Model
         'stockActual',
         'estado',
     ];
+
+    /**
+     * Servicios que utilizan este producto.
+     */
+    public function services()
+    {
+        return $this->belongsToMany(Service::class, 'inventory_service')
+            ->withPivot('quantity')
+            ->withTimestamps();
+    }
 }

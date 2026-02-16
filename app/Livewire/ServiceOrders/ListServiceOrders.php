@@ -300,8 +300,8 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                             Select::make('service_id')
                                 ->label('Servicio')
                                 ->placeholder('Seleccionar servicio...')
-                                ->options(Service::where('estado', true)->get()->mapWithKeys(fn ($s) => [
-                                    $s->id => "{$s->nombre} - \${$s->precio}" . ($s->inventory && $s->inventory->stockActual > 0 ? ' ✓' : ' ✗ Sin Stock')
+                                ->options(Service::where('estado', true)->with('inventories')->get()->mapWithKeys(fn ($s) => [
+                                    $s->id => "{$s->nombre} - \${$s->precio}" . ($s->cantidad > 0 ? ' ✓' : ' ✗ Sin Stock')
                                 ]))
                                 ->searchable()
                                 ->required(),
