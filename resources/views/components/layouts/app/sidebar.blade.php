@@ -29,54 +29,46 @@
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Inicio')" class="nav-group grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
-                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Tablero') }}</span>
-                    </flux:navlist.item>
-                </flux:navlist.group>
-            </flux:navlist>
-
-            <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Operaciones')" class="nav-group grid">
-                    <flux:navlist.item icon="clipboard-document-list" :href="route('service-orders.index')" :current="request()->routeIs('service-orders.index')" wire:navigate>
-                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Órdenes de Servicio') }}</span>
-                    </flux:navlist.item>
-                    <flux:navlist.item icon="presentation-chart-line" :href="route('venta.index')" :current="request()->routeIs('venta.index')" wire:navigate>
-                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Venta') }}</span>
+                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Dashboard') }}</span>
                     </flux:navlist.item>
                 </flux:navlist.group>
 
-                <flux:navlist.group :heading="__('Registro y Venta')" class="nav-group grid">
+                <flux:navlist.group :heading="__('Gestión')" class="nav-group grid">
                     <flux:navlist.item icon="users" :href="route('customers.index')" :current="request()->routeIs('customers.index')" wire:navigate>
                         <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Clientes') }}</span>
                     </flux:navlist.item>
-                    @if(auth()->user()?->role === 'Administrador')
-                        <flux:navlist.item icon="credit-card" :href="route('payment-methods.index')" :current="request()->routeIs('payment-methods.index')" wire:navigate>
-                            <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Métodos de Pago') }}</span>
-                        </flux:navlist.item>
-                    @endif
-                </flux:navlist.group>
-
-                <flux:navlist.group :heading="__('Maestros y Recursos')" class="nav-group grid">
                     <flux:navlist.item icon="archive-box" :href="route('inventories.index')" :current="request()->routeIs('inventories.index')" wire:navigate>
-                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Inventarios') }}</span>
+                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Inventario') }}</span>
                     </flux:navlist.item>
                     <flux:navlist.item icon="wrench-screwdriver" :href="route('services.index')" :current="request()->routeIs('services.index')" wire:navigate>
                         <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Servicios') }}</span>
                     </flux:navlist.item>
+                    @if(auth()->user()?->role === 'Administrador')
+                        <flux:navlist.item icon="credit-card" :href="route('payment-methods.index')" :current="request()->routeIs('payment-methods.index')" wire:navigate>
+                            <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Metodos de pago') }}</span>
+                        </flux:navlist.item>
+                    @endif
                 </flux:navlist.group>
 
-                <flux:navlist.group :heading="__('Ventas')" class="nav-group grid">
+                <flux:navlist.group :heading="__('Operaciones')" class="nav-group grid">
+                    <flux:navlist.item icon="clipboard-document-list" :href="route('service-orders.index')" :current="request()->routeIs('service-orders.index')" wire:navigate>
+                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Ordenes de servicio') }}</span>
+                    </flux:navlist.item>
+                    <flux:navlist.item icon="presentation-chart-line" :href="route('venta.index')" :current="request()->routeIs('venta.index')" wire:navigate>
+                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Venta') }}</span>
+                    </flux:navlist.item>
                     <flux:navlist.item icon="shopping-cart" :href="route('sales.index')" :current="request()->routeIs('sales.index')" wire:navigate>
-                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Historial de Ventas') }}</span>
+                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Historial de venta') }}</span>
                     </flux:navlist.item>
                 </flux:navlist.group>
 
                 @if(auth()->user()?->role === 'Administrador')
-                    <flux:navlist.group :heading="__('Administración y Control')" class="nav-group grid">
+                    <flux:navlist.group :heading="__('Administración')" class="nav-group grid">
                         <flux:navlist.item icon="user" :href="route('users.index')" :current="request()->routeIs('users.index')" wire:navigate>
-                            <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Usuarios') }}</span>
+                            <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Gestion de usuarios') }}</span>
                         </flux:navlist.item>
                         <flux:navlist.item icon="shield-check" :href="route('audit.index')" :current="request()->routeIs('audit.index')" wire:navigate>
-                            <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Auditoría') }}</span>
+                            <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Auditoria') }}</span>
                         </flux:navlist.item>
                     </flux:navlist.group>
                 @endif
