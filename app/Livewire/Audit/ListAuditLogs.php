@@ -63,6 +63,18 @@ class ListAuditLogs extends Component implements HasActions, HasSchemas, HasTabl
                 TextColumn::make('modelo')
                     ->label('Módulo')
                     ->searchable()
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'Customer' => 'Clientes',
+                        'User' => 'Usuarios',
+                        'Service' => 'Servicios',
+                        'ServiceOrder' => 'Órdenes de Servicio',
+                        'Inventory' => 'Inventario',
+                        'PaymentMethod' => 'Métodos de Pago',
+                        'Autenticación' => 'Seguridad',
+                        'Sale' => 'Ventas',
+                        'Vehicle' => 'Vehículos',
+                        default => $state ?? '-',
+                    })
                     ->placeholder('-'),
                 TextColumn::make('modelo_id')
                     ->label('ID Registro')

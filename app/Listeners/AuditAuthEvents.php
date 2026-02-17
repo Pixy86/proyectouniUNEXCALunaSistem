@@ -16,7 +16,8 @@ class AuditAuthEvents
         // Registra en auditoría cada inicio de sesión exitoso
         AuditLog::registrar(
             accion: AuditLog::ACCION_LOGIN,
-            descripcion: "Usuario {$event->user->name} inició sesión exitosamente"
+            descripcion: "Usuario {$event->user->name} inició sesión exitosamente",
+            modelo: 'Autenticación'
         );
     }
 
@@ -29,7 +30,8 @@ class AuditAuthEvents
             // Registra en auditoría cada cierre de sesión
             AuditLog::registrar(
                 accion: AuditLog::ACCION_LOGOUT,
-                descripcion: "Usuario {$event->user->name} cerró sesión"
+                descripcion: "Usuario {$event->user->name} cerró sesión",
+                modelo: 'Autenticación'
             );
         }
     }

@@ -210,7 +210,7 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                         \App\Models\AuditLog::registrar(
                             accion: \App\Models\AuditLog::ACCION_UPDATE,
                             descripcion: "Vehículos del cliente {$record->nombre} {$record->apellido} actualizados (Total: " . count($processedIds) . ")",
-                            modelo: 'Customer',
+                            modelo: 'Vehicle',
                             modeloId: $record->id
                         );
 
