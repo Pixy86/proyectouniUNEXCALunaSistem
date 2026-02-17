@@ -147,6 +147,13 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                         }
                         $service->inventories()->sync($pivotData);
 
+                        \App\Models\AuditLog::registrar(
+                            accion: \App\Models\AuditLog::ACCION_CREATE,
+                            descripcion: "Nuevo servicio creado: {$service->nombre}",
+                            modelo: 'Service',
+                            modeloId: $service->id
+                        );
+
                         Notification::make()
                             ->title('Servicio Creado')
                             ->success()
@@ -165,6 +172,12 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                     ->iconButton()
                     ->action(function (Service $record) {
                         $record->update(['estado' => !$record->estado]);
+                        \App\Models\AuditLog::registrar(
+                            accion: \App\Models\AuditLog::ACCION_UPDATE,
+                            descripcion: "Estado de servicio '{$record->nombre}' actualizado a: " . ($record->estado ? 'Activo' : 'Inactivo'),
+                            modelo: 'Service',
+                            modeloId: $record->id
+                        );
                         Notification::make()
                             ->title('Estado Actualizado')
                             ->success()
@@ -206,6 +219,13 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                         }
                         $record->inventories()->sync($pivotData);
 
+                        \App\Models\AuditLog::registrar(
+                            accion: \App\Models\AuditLog::ACCION_UPDATE,
+                            descripcion: "Servicio '{$record->nombre}' actualizado",
+                            modelo: 'Service',
+                            modeloId: $record->id
+                        );
+
                         Notification::make()
                             ->title('Servicio Actualizado')
                             ->success()
@@ -217,7 +237,21 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                     ->label('')
                     ->tooltip('Eliminar')
                     ->size('lg')
-                    ->iconButton(),
+                    ->iconButton()
+                    ->action(function (Service $record) {
+                        $nombre = $record->nombre;
+                        $record->delete();
+                        \App\Models\AuditLog::registrar(
+                            accion: \App\Models\AuditLog::ACCION_DELETE,
+                            descripcion: "Servicio eliminado: {$nombre}",
+                            modelo: 'Service',
+                            modeloId: $record->id
+                        );
+                        Notification::make()
+                            ->title('Servicio Eliminado')
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([

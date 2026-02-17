@@ -93,7 +93,19 @@ class ListUser extends Component implements HasActions, HasSchemas, HasTable
                                     ])
                                     ->required(),
                             ]),
-                    ]),
+                    ])
+                    ->after(function (User $record) {
+                        \App\Models\AuditLog::registrar(
+                            accion: \App\Models\AuditLog::ACCION_UPDATE,
+                            descripcion: "Usuario '{$record->name}' actualizado (Rol: {$record->role})",
+                            modelo: 'User',
+                            modeloId: $record->id
+                        );
+                        Notification::make()
+                            ->title('Usuario Actualizado')
+                            ->success()
+                            ->send();
+                    }),
                 Action::make('toggleEstado')
                     ->label('')
                     ->tooltip(fn (User $record): string => $record->estado ? 'Desactivar Usuario' : 'Activar Usuario')
@@ -104,6 +116,12 @@ class ListUser extends Component implements HasActions, HasSchemas, HasTable
                     ->visible(fn () => auth()->user()?->role === 'Administrador')
                     ->action(function (User $record) {
                         $record->update(['estado' => !$record->estado]);
+                        \App\Models\AuditLog::registrar(
+                            accion: \App\Models\AuditLog::ACCION_UPDATE,
+                            descripcion: "Estado de usuario '{$record->name}' actualizado a: " . ($record->estado ? 'Activo' : 'Inactivo'),
+                            modelo: 'User',
+                            modeloId: $record->id
+                        );
                         Notification::make()
                             ->title('Estado del Usuario Actualizado')
                             ->success()

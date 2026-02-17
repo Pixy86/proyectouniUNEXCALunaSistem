@@ -119,6 +119,13 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                             ]);
                         }
 
+                        \App\Models\AuditLog::registrar(
+                            accion: \App\Models\AuditLog::ACCION_CREATE,
+                            descripcion: "Orden de servicio #{$order->id} creada para el cliente {$order->customer->nombre} {$order->customer->apellido}",
+                            modelo: 'ServiceOrder',
+                            modeloId: $order->id
+                        );
+
                         Notification::make()
                             ->title('Orden Creada')
                             ->body("Orden #{$order->id} creada exitosamente.")
@@ -194,6 +201,12 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                             'status' => $data['status'],
                             'completed_at' => $data['status'] === ServiceOrder::STATUS_TERMINADO ? now() : null,
                         ]);
+                        \App\Models\AuditLog::registrar(
+                            accion: \App\Models\AuditLog::ACCION_UPDATE,
+                            descripcion: "Estado de orden #{$record->id} actualizado a: {$data['status']}",
+                            modelo: 'ServiceOrder',
+                            modeloId: $record->id
+                        );
                         Notification::make()
                             ->title('Estado Actualizado')
                             ->success()
@@ -238,6 +251,13 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                             ]);
                         }
 
+                        \App\Models\AuditLog::registrar(
+                            accion: \App\Models\AuditLog::ACCION_UPDATE,
+                            descripcion: "Orden de servicio #{$record->id} editada (Items actualizados)",
+                            modelo: 'ServiceOrder',
+                            modeloId: $record->id
+                        );
+
                         Notification::make()
                             ->title('Orden Actualizada')
                             ->success()
@@ -256,6 +276,12 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                     ->modalDescription('¿Estás seguro de que deseas cancelar esta orden? Esta acción no se puede deshacer.')
                     ->action(function (ServiceOrder $record) {
                         $record->update(['status' => ServiceOrder::STATUS_CANCELADA]);
+                        \App\Models\AuditLog::registrar(
+                            accion: \App\Models\AuditLog::ACCION_UPDATE,
+                            descripcion: "Orden de servicio #{$record->id} cancelada",
+                            modelo: 'ServiceOrder',
+                            modeloId: $record->id
+                        );
                         Notification::make()
                             ->title('Orden Cancelada')
                             ->success()

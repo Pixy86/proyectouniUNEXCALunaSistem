@@ -115,7 +115,13 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                             ]),
                     ])
                     ->action(function (array $data) {
-                        Customer::create($data);
+                        $customer = Customer::create($data);
+                        \App\Models\AuditLog::registrar(
+                            accion: \App\Models\AuditLog::ACCION_CREATE,
+                            descripcion: "Nuevo cliente registrado: {$customer->nombre} {$customer->apellido}",
+                            modelo: 'Customer',
+                            modeloId: $customer->id
+                        );
                         Notification::make()
                             ->title('Cliente Creado')
                             ->body('El cliente ha sido registrado exitosamente.')
@@ -201,6 +207,13 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                         // Usamos forceDelete para que la placa quede libre inmediatamente
                         $record->vehicles()->whereNotIn('id', $processedIds)->forceDelete();
 
+                        \App\Models\AuditLog::registrar(
+                            accion: \App\Models\AuditLog::ACCION_UPDATE,
+                            descripcion: "Vehículos del cliente {$record->nombre} {$record->apellido} actualizados (Total: " . count($processedIds) . ")",
+                            modelo: 'Customer',
+                            modeloId: $record->id
+                        );
+
                         Notification::make()
                             ->title('Vehículos Actualizados')
                             ->body("Se han guardado los cambios en los vehículos de {$record->nombre} {$record->apellido}")
@@ -220,6 +233,12 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                     ->iconButton()
                     ->action(function (Customer $record) {
                         $record->update(['estado' => !$record->estado]);
+                        \App\Models\AuditLog::registrar(
+                            accion: \App\Models\AuditLog::ACCION_UPDATE,
+                            descripcion: "Estado de cliente '{$record->nombre} {$record->apellido}' actualizado a: " . ($record->estado ? 'Activo' : 'Inactivo'),
+                            modelo: 'Customer',
+                            modeloId: $record->id
+                        );
                         Notification::make()
                             ->title('Estado Actualizado')
                             ->success()
@@ -254,12 +273,39 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                             ]),
 
                     ])
-                    ->closeModalByClickingAway(false),
+                    ->closeModalByClickingAway(false)
+                    ->action(function (Customer $record, array $data) {
+                        $record->update($data);
+                        \App\Models\AuditLog::registrar(
+                            accion: \App\Models\AuditLog::ACCION_UPDATE,
+                            descripcion: "Datos del cliente '{$record->nombre} {$record->apellido}' actualizados",
+                            modelo: 'Customer',
+                            modeloId: $record->id
+                        );
+                        Notification::make()
+                            ->title('Cliente Actualizado')
+                            ->success()
+                            ->send();
+                    }),
                 DeleteAction::make()
                     ->label('')
                     ->tooltip('Eliminar')
                     ->size('lg')
-                    ->iconButton(),
+                    ->iconButton()
+                    ->action(function (Customer $record) {
+                        $nombre = "{$record->nombre} {$record->apellido}";
+                        $record->delete();
+                        \App\Models\AuditLog::registrar(
+                            accion: \App\Models\AuditLog::ACCION_DELETE,
+                            descripcion: "Cliente eliminado: {$nombre}",
+                            modelo: 'Customer',
+                            modeloId: $record->id
+                        );
+                        Notification::make()
+                            ->title('Cliente Eliminado')
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

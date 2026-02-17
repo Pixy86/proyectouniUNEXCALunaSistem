@@ -66,6 +66,18 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
                     ->modalHeading('Crear Inventario')
                     ->icon('heroicon-m-plus')
                     ->modalWidth('2xl')
+                    ->after(function (Inventory $record) {
+                        \App\Models\AuditLog::registrar(
+                            accion: \App\Models\AuditLog::ACCION_CREATE,
+                            descripcion: "Nuevo producto de inventario creado: {$record->nombreProducto}",
+                            modelo: 'Inventory',
+                            modeloId: $record->id
+                        );
+                        Notification::make()
+                            ->title('Producto Creado')
+                            ->success()
+                            ->send();
+                    })
                     ->form([
                         \Filament\Schemas\Components\Section::make('Información del Producto')
                             ->schema([
@@ -126,6 +138,18 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
                     ->tooltip('Editar Producto')
                     ->iconButton()
                     ->size('lg')
+                    ->after(function (Inventory $record) {
+                        \App\Models\AuditLog::registrar(
+                            accion: \App\Models\AuditLog::ACCION_UPDATE,
+                            descripcion: "Producto de inventario '{$record->nombreProducto}' actualizado",
+                            modelo: 'Inventory',
+                            modeloId: $record->id
+                        );
+                        Notification::make()
+                            ->title('Producto Actualizado')
+                            ->success()
+                            ->send();
+                    })
                     ->form([
                         \Filament\Schemas\Components\Section::make('Actualizar Producto')
                             ->schema([
@@ -157,7 +181,21 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
                     ->label('')
                     ->tooltip('Eliminar')
                     ->iconButton()
-                    ->size('lg'),
+                    ->size('lg')
+                    ->action(function (Inventory $record) {
+                        $nombre = $record->nombreProducto;
+                        $record->delete();
+                        \App\Models\AuditLog::registrar(
+                            accion: \App\Models\AuditLog::ACCION_DELETE,
+                            descripcion: "Producto de inventario eliminado: {$nombre}",
+                            modelo: 'Inventory',
+                            modeloId: $record->id
+                        );
+                        Notification::make()
+                            ->title('Producto Eliminado')
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -104,6 +104,12 @@ class ListPaymentMethods extends Component implements HasActions, HasSchemas, Ha
                     ->iconButton()
                     ->action(function (PaymentMethod $record) {
                         $record->update(['estado' => !$record->estado]);
+                        AuditLog::registrar(
+                            accion: AuditLog::ACCION_UPDATE,
+                            descripcion: "Estado de método de pago '{$record->nombre}' actualizado a: " . ($record->estado ? 'Activo' : 'Inactivo'),
+                            modelo: 'PaymentMethod',
+                            modeloId: $record->id
+                        );
                         Notification::make()
                             ->title('Estado Actualizado')
                             ->success()
@@ -130,12 +136,39 @@ class ListPaymentMethods extends Component implements HasActions, HasSchemas, Ha
                             ]),
 
                     ])
+                    ->action(function (PaymentMethod $record, array $data) {
+                        $record->update($data);
+                        AuditLog::registrar(
+                            accion: AuditLog::ACCION_UPDATE,
+                            descripcion: "Método de pago '{$record->nombre}' actualizado",
+                            modelo: 'PaymentMethod',
+                            modeloId: $record->id
+                        );
+                        Notification::make()
+                            ->title('Método Actualizado')
+                            ->success()
+                            ->send();
+                    })
                     ->closeModalByClickingAway(false),
                 DeleteAction::make()
                     ->label('')
                     ->tooltip('Eliminar')
                     ->size('lg')
-                    ->iconButton(),
+                    ->iconButton()
+                    ->action(function (PaymentMethod $record) {
+                        $nombre = $record->nombre;
+                        $record->delete();
+                        AuditLog::registrar(
+                            accion: AuditLog::ACCION_DELETE,
+                            descripcion: "Método de pago eliminado: {$nombre}",
+                            modelo: 'PaymentMethod',
+                            modeloId: $record->id
+                        );
+                        Notification::make()
+                            ->title('Método Eliminado')
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
