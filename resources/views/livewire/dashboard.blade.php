@@ -16,19 +16,20 @@
     </div>
 
     {{-- Charts Row --}}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {{-- Line Chart: Sales Trend --}}
-        <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-700 shadow-sm overflow-hidden">
-            <div class="p-1">
-                @livewire(\App\Livewire\SalesChart::class)
-            </div>
+        <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-700 shadow-sm overflow-hidden p-2">
+            @livewire(\App\Livewire\SalesChart::class)
         </div>
 
         {{-- Bar Chart: Orders Volume --}}
-        <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-700 shadow-sm overflow-hidden">
-            <div class="p-1">
-                @livewire(\App\Livewire\OrdersChart::class)
-            </div>
+        <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-700 shadow-sm overflow-hidden p-2">
+            @livewire(\App\Livewire\OrdersChart::class)
+        </div>
+
+        {{-- Doughnut Chart: Customers Status --}}
+        <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-700 shadow-sm overflow-hidden p-2">
+            @livewire(\App\Livewire\CustomersChart::class)
         </div>
     </div>
 
