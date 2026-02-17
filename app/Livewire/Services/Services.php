@@ -171,12 +171,15 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                     ->size('lg')
                     ->iconButton()
                     ->action(function (Service $record) {
+                        $oldData = $record->toArray();
                         $record->update(['estado' => !$record->estado]);
                         \App\Models\AuditLog::registrar(
                             accion: \App\Models\AuditLog::ACCION_UPDATE,
                             descripcion: "Estado de servicio '{$record->nombre}' actualizado a: " . ($record->estado ? 'Activo' : 'Inactivo'),
                             modelo: 'Service',
-                            modeloId: $record->id
+                            modeloId: $record->id,
+                            datosAnteriores: $oldData,
+                            datosNuevos: $record->fresh()->toArray()
                         );
                         Notification::make()
                             ->title('Estado Actualizado')
@@ -203,6 +206,7 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                         ])->toArray(),
                     ])
                     ->action(function (Service $record, array $data) {
+                        $oldData = $record->toArray();
                         $record->update([
                             'nombre' => $data['nombre'],
                             'precio' => $data['precio'],
@@ -223,7 +227,9 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                             accion: \App\Models\AuditLog::ACCION_UPDATE,
                             descripcion: "Servicio '{$record->nombre}' actualizado",
                             modelo: 'Service',
-                            modeloId: $record->id
+                            modeloId: $record->id,
+                            datosAnteriores: $oldData,
+                            datosNuevos: $record->fresh()->toArray()
                         );
 
                         Notification::make()

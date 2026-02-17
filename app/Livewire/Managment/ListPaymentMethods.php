@@ -103,12 +103,15 @@ class ListPaymentMethods extends Component implements HasActions, HasSchemas, Ha
                     ->size('lg')
                     ->iconButton()
                     ->action(function (PaymentMethod $record) {
+                        $oldData = $record->toArray();
                         $record->update(['estado' => !$record->estado]);
                         AuditLog::registrar(
                             accion: AuditLog::ACCION_UPDATE,
                             descripcion: "Estado de método de pago '{$record->nombre}' actualizado a: " . ($record->estado ? 'Activo' : 'Inactivo'),
                             modelo: 'PaymentMethod',
-                            modeloId: $record->id
+                            modeloId: $record->id,
+                            datosAnteriores: $oldData,
+                            datosNuevos: $record->fresh()->toArray()
                         );
                         Notification::make()
                             ->title('Estado Actualizado')
@@ -137,12 +140,15 @@ class ListPaymentMethods extends Component implements HasActions, HasSchemas, Ha
 
                     ])
                     ->action(function (PaymentMethod $record, array $data) {
+                        $oldData = $record->toArray();
                         $record->update($data);
                         AuditLog::registrar(
                             accion: AuditLog::ACCION_UPDATE,
                             descripcion: "Método de pago '{$record->nombre}' actualizado",
                             modelo: 'PaymentMethod',
-                            modeloId: $record->id
+                            modeloId: $record->id,
+                            datosAnteriores: $oldData,
+                            datosNuevos: $record->fresh()->toArray()
                         );
                         Notification::make()
                             ->title('Método Actualizado')

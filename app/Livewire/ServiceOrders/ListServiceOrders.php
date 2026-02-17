@@ -197,6 +197,7 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                     ])
                     ->fillForm(fn (ServiceOrder $record): array => ['status' => $record->status])
                     ->action(function (ServiceOrder $record, array $data) {
+                        $oldData = $record->toArray();
                         $record->update([
                             'status' => $data['status'],
                             'completed_at' => $data['status'] === ServiceOrder::STATUS_TERMINADO ? now() : null,
@@ -205,7 +206,9 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                             accion: \App\Models\AuditLog::ACCION_UPDATE,
                             descripcion: "Estado de orden #{$record->id} actualizado a: {$data['status']}",
                             modelo: 'ServiceOrder',
-                            modeloId: $record->id
+                            modeloId: $record->id,
+                            datosAnteriores: $oldData,
+                            datosNuevos: $record->fresh()->toArray()
                         );
                         Notification::make()
                             ->title('Estado Actualizado')
@@ -233,6 +236,7 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                         ])->toArray(),
                     ])
                     ->action(function (ServiceOrder $record, array $data) {
+                        $oldData = $record->toArray();
                         $record->update([
                             'customer_id' => $data['customer_id'],
                             'vehicle_id' => $data['vehicle_id'],
@@ -255,7 +259,9 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                             accion: \App\Models\AuditLog::ACCION_UPDATE,
                             descripcion: "Orden de servicio #{$record->id} editada (Items actualizados)",
                             modelo: 'ServiceOrder',
-                            modeloId: $record->id
+                            modeloId: $record->id,
+                            datosAnteriores: $oldData,
+                            datosNuevos: $record->fresh()->toArray()
                         );
 
                         Notification::make()

@@ -55,6 +55,43 @@ class AuditLog extends Model
         ?array $datosAnteriores = null,
         ?array $datosNuevos = null
     ): self {
+        // Si es una actualización y tenemos datos, generamos el detalle de cambios
+        if ($accion === self::ACCION_UPDATE && !empty($datosAnteriores) && !empty($datosNuevos)) {
+            $cambios = [];
+            foreach ($datosNuevos as $key => $value) {
+                // Solo incluimos campos que realmente cambiaron y no son técnicos (como updated_at)
+                if (array_key_exists($key, $datosAnteriores) && 
+                    $datosAnteriores[$key] != $value && 
+                    !in_array($key, ['updated_at', 'password', 'remember_token'])) {
+                    
+                    $old = is_array($datosAnteriores[$key]) ? json_encode($datosAnteriores[$key]) : ($datosAnteriores[$key] ?? 'vacio');
+                    $new = is_array($value) ? json_encode($value) : ($value ?? 'vacio');
+                    
+                    // Traducir nombres de campos comunes para que el usuario entienda
+                    $label = match($key) {
+                        'nombre' => 'Nombre',
+                        'apellido' => 'Apellido',
+                        'email' => 'Email',
+                        'telefono' => 'Teléfono',
+                        'cedula_rif' => 'Cédula/RIF',
+                        'direccion' => 'Dirección',
+                        'precio' => 'Precio',
+                        'stockActual' => 'Stock',
+                        'estado' => 'Estado',
+                        'role' => 'Cargo',
+                        'status' => 'Estatus',
+                        default => $key
+                    };
+
+                    $cambios[] = "{$label}: '{$old}' → '{$new}'";
+                }
+            }
+            
+            if (!empty($cambios)) {
+                $descripcion .= " | Cambios: " . implode(", ", $cambios);
+            }
+        }
+
         return self::create([
             'user_id' => Auth::id(),
             'accion' => $accion,

@@ -232,12 +232,15 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                     ->size('lg')
                     ->iconButton()
                     ->action(function (Customer $record) {
+                        $oldData = $record->toArray();
                         $record->update(['estado' => !$record->estado]);
                         \App\Models\AuditLog::registrar(
                             accion: \App\Models\AuditLog::ACCION_UPDATE,
                             descripcion: "Estado de cliente '{$record->nombre} {$record->apellido}' actualizado a: " . ($record->estado ? 'Activo' : 'Inactivo'),
                             modelo: 'Customer',
-                            modeloId: $record->id
+                            modeloId: $record->id,
+                            datosAnteriores: $oldData,
+                            datosNuevos: $record->fresh()->toArray()
                         );
                         Notification::make()
                             ->title('Estado Actualizado')
@@ -275,12 +278,15 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                     ])
                     ->closeModalByClickingAway(false)
                     ->action(function (Customer $record, array $data) {
+                        $oldData = $record->toArray();
                         $record->update($data);
                         \App\Models\AuditLog::registrar(
                             accion: \App\Models\AuditLog::ACCION_UPDATE,
                             descripcion: "Datos del cliente '{$record->nombre} {$record->apellido}' actualizados",
                             modelo: 'Customer',
-                            modeloId: $record->id
+                            modeloId: $record->id,
+                            datosAnteriores: $oldData,
+                            datosNuevos: $record->fresh()->toArray()
                         );
                         Notification::make()
                             ->title('Cliente Actualizado')

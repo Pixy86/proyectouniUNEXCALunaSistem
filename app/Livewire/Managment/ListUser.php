@@ -95,11 +95,17 @@ class ListUser extends Component implements HasActions, HasSchemas, HasTable
                             ]),
                     ])
                     ->after(function (User $record) {
+                        // Nota: El after recibe el record YA actualizado. 
+                        // Sin embargo, para obtener el cambio detallado, 
+                        // idealmente guardaríamos el estado anterior antes.
+                        // Como Filament maneja la actualización, usaremos getsChanges() si es posible o simplemente registraremos el nuevo estado.
                         \App\Models\AuditLog::registrar(
                             accion: \App\Models\AuditLog::ACCION_UPDATE,
                             descripcion: "Usuario '{$record->name}' actualizado (Rol: {$record->role})",
                             modelo: 'User',
-                            modeloId: $record->id
+                            modeloId: $record->id,
+                            datosAnteriores: $record->getOriginal(), // getOriginal tiene los datos antes del save en un Eloquent hook
+                            datosNuevos: $record->toArray()
                         );
                         Notification::make()
                             ->title('Usuario Actualizado')
@@ -115,12 +121,15 @@ class ListUser extends Component implements HasActions, HasSchemas, HasTable
                     ->iconButton()
                     ->visible(fn () => auth()->user()?->role === 'Administrador')
                     ->action(function (User $record) {
+                        $oldData = $record->toArray();
                         $record->update(['estado' => !$record->estado]);
                         \App\Models\AuditLog::registrar(
                             accion: \App\Models\AuditLog::ACCION_UPDATE,
                             descripcion: "Estado de usuario '{$record->name}' actualizado a: " . ($record->estado ? 'Activo' : 'Inactivo'),
                             modelo: 'User',
-                            modeloId: $record->id
+                            modeloId: $record->id,
+                            datosAnteriores: $oldData,
+                            datosNuevos: $record->fresh()->toArray()
                         );
                         Notification::make()
                             ->title('Estado del Usuario Actualizado')
