@@ -47,7 +47,7 @@
                                 </div>
                             </div>
                             
-                            @if($order->status === 'Abierta')
+                            @if($order->status === 'Abierta' && in_array(auth()->user()?->role, ['Administrador', 'Encargado']))
                                 <div class="mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
                                     <flux:button wire:click.stop="moveToProcess({{ $order->id }})" variant="outline" size="sm" class="w-full">
                                         <flux:icon.arrow-right class="w-3 h-3" />

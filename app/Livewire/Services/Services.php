@@ -129,6 +129,7 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                     ->label('Nuevo Servicio')
                     ->icon('heroicon-m-plus')
                     ->color('primary')
+                    ->visible(fn () => in_array(auth()->user()?->role, ['Administrador', 'Encargado']))
                     ->form($this->getServiceForm())
                     ->action(function (array $data) {
                         $service = Service::create([
@@ -169,6 +170,7 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                     ->icon(fn (Service $record): string => $record->estado ? 'heroicon-m-x-circle' : 'heroicon-m-check-circle')
                     ->color(fn (Service $record): string => $record->estado ? 'danger' : 'success')
                     ->size('lg')
+                    ->visible(fn () => in_array(auth()->user()?->role, ['Administrador', 'Encargado']))
                     ->iconButton()
                     ->action(function (Service $record) {
                         $oldData = $record->toArray();
@@ -192,6 +194,7 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                     ->icon('heroicon-m-pencil')
                     ->color('info')
                     ->size('lg')
+                    ->visible(fn () => in_array(auth()->user()?->role, ['Administrador', 'Encargado']))
                     ->iconButton()
                     ->modalHeading('Editar Servicio')
                     ->form($this->getServiceForm())
@@ -243,6 +246,7 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                     ->label('')
                     ->tooltip('Eliminar')
                     ->size('lg')
+                    ->visible(fn () => auth()->user()?->role === 'Administrador')
                     ->iconButton()
                     ->action(function (Service $record) {
                         $nombre = $record->nombre;

@@ -213,6 +213,11 @@ class Venta extends Component
     // Cambia el estado de una orden de "Abierta" a "En Proceso"
     public function moveToProcess($orderId)
     {
+        if (!in_array(auth()->user()?->role, ['Administrador', 'Encargado'])) {
+            Notification::make()->title('No tiene permisos para cambiar el estado de la orden')->danger()->send();
+            return;
+        }
+
         $order = ServiceOrder::find($orderId);
         if ($order && $order->status === ServiceOrder::STATUS_ABIERTA) {
             $order->update(['status' => ServiceOrder::STATUS_EN_PROCESO]);

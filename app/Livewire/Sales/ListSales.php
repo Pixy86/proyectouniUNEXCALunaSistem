@@ -20,6 +20,13 @@ class ListSales extends Component implements HasActions, HasSchemas, HasTable
     use InteractsWithActions;
     use InteractsWithTable;
     use InteractsWithSchemas;
+    
+    public function mount(): void
+    {
+        if (!in_array(auth()->user()?->role, ['Administrador', 'Encargado'])) {
+            abort(403, 'No tiene permisos para acceder a este módulo.');
+        }
+    }
 
     public function table(Table $table): Table
     {

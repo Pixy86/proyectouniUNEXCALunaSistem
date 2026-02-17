@@ -183,6 +183,7 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                     ])
                                     ->itemLabel(fn (array $state): ?string => $state['placa'] ?? 'Nuevo Vehículo')
                                     ->addActionLabel('Agregar Vehículo')
+                                    ->deletable(fn () => auth()->user()?->role === 'Administrador')
                                     ->collapsible()
                                     ->defaultItems(0),
                             ]),
@@ -203,9 +204,10 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                             $processedIds[] = $vehicle->id;
                         }
 
-                        // Eliminamos permanentemente los que el usuario quitó en la interfaz
-                        // Usamos forceDelete para que la placa quede libre inmediatamente
-                        $record->vehicles()->whereNotIn('id', $processedIds)->forceDelete();
+                        // Eliminamos permanentemente los que el usuario quitó en la interfaz (Solo si es Admin)
+                        if (auth()->user()?->role === 'Administrador') {
+                            $record->vehicles()->whereNotIn('id', $processedIds)->forceDelete();
+                        }
 
                         \App\Models\AuditLog::registrar(
                             accion: \App\Models\AuditLog::ACCION_UPDATE,
@@ -297,6 +299,7 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                     ->label('')
                     ->tooltip('Eliminar')
                     ->size('lg')
+                    ->visible(fn () => auth()->user()?->role === 'Administrador')
                     ->iconButton()
                     ->action(function (Customer $record) {
                         $nombre = "{$record->nombre} {$record->apellido}";

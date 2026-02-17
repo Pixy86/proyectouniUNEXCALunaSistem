@@ -31,6 +31,13 @@ class ListPaymentMethods extends Component implements HasActions, HasSchemas, Ha
     use InteractsWithActions;
     use InteractsWithTable;
     use InteractsWithSchemas;
+    
+    public function mount(): void
+    {
+        if (!in_array(auth()->user()?->role, ['Administrador', 'Encargado'])) {
+            abort(403, 'No tiene permisos para acceder a este módulo.');
+        }
+    }
 
     public function table(Table $table): Table
     {
@@ -160,6 +167,7 @@ class ListPaymentMethods extends Component implements HasActions, HasSchemas, Ha
                     ->label('')
                     ->tooltip('Eliminar')
                     ->size('lg')
+                    ->visible(fn () => auth()->user()?->role === 'Administrador')
                     ->iconButton()
                     ->action(function (PaymentMethod $record) {
                         $nombre = $record->nombre;

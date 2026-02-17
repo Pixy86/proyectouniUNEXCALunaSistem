@@ -188,7 +188,11 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                     ->icon('heroicon-m-arrow-path')
                     ->color('warning')
                     ->iconButton()
-                    ->visible(fn (ServiceOrder $record): bool => $record->status !== ServiceOrder::STATUS_TERMINADO && $record->status !== ServiceOrder::STATUS_CANCELADA)
+                    ->visible(fn (ServiceOrder $record): bool => 
+                        $record->status !== ServiceOrder::STATUS_TERMINADO && 
+                        $record->status !== ServiceOrder::STATUS_CANCELADA &&
+                        in_array(auth()->user()?->role, ['Administrador', 'Encargado'])
+                    )
                     ->form([
                         Select::make('status')
                             ->label('Nuevo Estado')

@@ -29,6 +29,13 @@ class ListUser extends Component implements HasActions, HasSchemas, HasTable
     use InteractsWithActions;
     use InteractsWithTable;
     use InteractsWithSchemas;
+    
+    public function mount(): void
+    {
+        if (auth()->user()?->role !== 'Administrador') {
+            abort(403, 'No tiene permisos para acceder a este módulo.');
+        }
+    }
 
     public function table(Table $table): Table
     {

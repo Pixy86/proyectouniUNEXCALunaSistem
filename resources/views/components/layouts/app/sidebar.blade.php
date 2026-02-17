@@ -43,7 +43,7 @@
                     <flux:navlist.item icon="wrench-screwdriver" :href="route('services.index')" :current="request()->routeIs('services.index')" wire:navigate>
                         <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Servicios') }}</span>
                     </flux:navlist.item>
-                    @if(auth()->user()?->role === 'Administrador')
+                    @if(in_array(auth()->user()?->role, ['Administrador', 'Encargado']))
                         <flux:navlist.item icon="credit-card" :href="route('payment-methods.index')" :current="request()->routeIs('payment-methods.index')" wire:navigate>
                             <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Metodos de pago') }}</span>
                         </flux:navlist.item>
@@ -57,9 +57,11 @@
                     <flux:navlist.item icon="presentation-chart-line" :href="route('venta.index')" :current="request()->routeIs('venta.index')" wire:navigate>
                         <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Venta') }}</span>
                     </flux:navlist.item>
-                    <flux:navlist.item icon="shopping-cart" :href="route('sales.index')" :current="request()->routeIs('sales.index')" wire:navigate>
-                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Historial de venta') }}</span>
-                    </flux:navlist.item>
+                    @if(in_array(auth()->user()?->role, ['Administrador', 'Encargado']))
+                        <flux:navlist.item icon="shopping-cart" :href="route('sales.index')" :current="request()->routeIs('sales.index')" wire:navigate>
+                            <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Historial de venta') }}</span>
+                        </flux:navlist.item>
+                    @endif
                 </flux:navlist.group>
 
                 @if(auth()->user()?->role === 'Administrador')

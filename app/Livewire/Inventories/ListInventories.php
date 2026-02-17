@@ -182,6 +182,7 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
                     ->tooltip('Eliminar')
                     ->iconButton()
                     ->size('lg')
+                    ->visible(fn () => auth()->user()?->role === 'Administrador')
                     ->action(function (Inventory $record) {
                         $nombre = $record->nombreProducto;
                         $record->delete();
