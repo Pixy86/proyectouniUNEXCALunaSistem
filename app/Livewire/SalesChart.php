@@ -87,7 +87,7 @@ class SalesChart extends ChartWidget
                     'fill' => true,
                 ],
             ],
-            'labels' => $labels->toArray(),
+            'labels' => collect($labels)->toArray(),
         ];
     }
 
