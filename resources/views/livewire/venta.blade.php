@@ -72,7 +72,7 @@
         <div class="sticky top-0 z-10 p-4 border-b border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800">
             <h2 class="font-bold text-lg text-gray-800 dark:text-gray-100 flex items-center gap-2">
                 <flux:icon.shopping-cart class="w-5 h-5" />
-                Carrito de Ventas
+                Ventas
             </h2>
         </div>
 
