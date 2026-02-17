@@ -24,24 +24,18 @@
     {{-- Charts Row --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {{-- Line Chart: Sales Trend --}}
-        <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden p-4">
-            <div class="h-64 lg:h-80">
-                @livewire(\App\Livewire\SalesChart::class)
-            </div>
+        <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow duration-300 p-4">
+            @livewire(\App\Livewire\SalesChart::class)
         </div>
 
         {{-- Bar Chart: Orders Volume --}}
-        <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden p-4">
-            <div class="h-64 lg:h-80">
-                @livewire(\App\Livewire\OrdersChart::class)
-            </div>
+        <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow duration-300 p-4">
+            @livewire(\App\Livewire\OrdersChart::class)
         </div>
 
         {{-- Doughnut Chart: Customers Status --}}
-        <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden p-4">
-            <div class="h-64 lg:h-80">
-                @livewire(\App\Livewire\CustomersChart::class)
-            </div>
+        <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow duration-300 p-4">
+            @livewire(\App\Livewire\CustomersChart::class)
         </div>
     </div>
 
