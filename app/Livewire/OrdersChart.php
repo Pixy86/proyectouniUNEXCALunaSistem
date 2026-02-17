@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 class OrdersChart extends ChartWidget
 {
     protected ?string $heading = 'Flujo de Órdenes de Servicio';
-    protected static ?string $pollingInterval = '30s';
+    protected ?string $pollingInterval = '30s';
     public ?string $filter = 'month';
 
     protected function getFilters(): ?array

@@ -8,7 +8,7 @@ use Filament\Widgets\ChartWidget;
 class CustomersChart extends ChartWidget
 {
     protected ?string $heading = 'Estado de Clientes';
-    protected static ?string $pollingInterval = '60s';
+    protected ?string $pollingInterval = '60s';
 
     protected function getData(): array
     {

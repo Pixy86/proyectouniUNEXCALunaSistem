@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 class SalesChart extends ChartWidget
 {
     protected ?string $heading = 'Rendimiento de Ventas';
-    protected static ?string $pollingInterval = '30s';
+    protected ?string $pollingInterval = '30s';
     public ?string $filter = 'month';
 
     protected function getFilters(): ?array
