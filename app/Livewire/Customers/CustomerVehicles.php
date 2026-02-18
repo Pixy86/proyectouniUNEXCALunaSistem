@@ -47,7 +47,10 @@ class CustomerVehicles extends Component implements HasForms, HasTable, HasActio
                     ->form([
                         TextInput::make('placa')
                             ->required()
-                            ->unique('vehicles', 'placa'),
+                            ->unique('vehicles', 'placa')
+                            ->validationMessages([
+                                'unique' => 'Esta placa ya ha sido registrada por otro cliente.',
+                            ]),
                         TextInput::make('marca')
                             ->required(),
                         TextInput::make('modelo')
@@ -107,7 +110,10 @@ class CustomerVehicles extends Component implements HasForms, HasTable, HasActio
                     ->form([
                         TextInput::make('placa')
                             ->required()
-                            ->unique('vehicles', 'placa', ignoreRecord: true),
+                            ->unique('vehicles', 'placa', ignoreRecord: true)
+                            ->validationMessages([
+                                'unique' => 'Esta placa ya ha sido registrada por otro cliente.',
+                            ]),
                         TextInput::make('marca')
                             ->required(),
                         TextInput::make('modelo')

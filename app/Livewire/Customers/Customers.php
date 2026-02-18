@@ -151,7 +151,13 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                                 TextInput::make('placa')
                                                     ->label('Placa')
                                                     ->required()
-                                                    ->placeholder('Ej: ABC123'),
+                                                    ->placeholder('Ej: ABC123')
+                                                    ->distinct()
+                                                    ->unique('vehicles', 'placa', ignoreRecord: true)
+                                                    ->validationMessages([
+                                                        'unique' => 'Esta placa ya ha sido registrada por otro cliente.',
+                                                        'distinct' => 'No puedes registrar dos vehículos con la misma placa en la misma lista.',
+                                                    ]),
                                                 TextInput::make('marca')
                                                     ->label('Marca')
                                                     ->required()
@@ -192,35 +198,50 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                         'vehicles' => $record->vehicles->toArray(),
                     ])
                     ->action(function (Customer $record, array $data): void {
-                        $processedIds = [];
+                        try {
+                            $processedIds = [];
 
-                        foreach ($data['vehicles'] as $vehicleData) {
-                            // Usamos updateOrCreate para mantener los registros existentes
-                            // Buscamos por ID si existe, o por placa si es de este cliente
-                            $vehicle = $record->vehicles()->updateOrCreate(
-                                ['id' => $vehicleData['id'] ?? null],
-                                $vehicleData
+                            foreach ($data['vehicles'] as $vehicleData) {
+                                // Usamos updateOrCreate para mantener los registros existentes
+                                // Buscamos por ID si existe, o por placa si es de este cliente
+                                $vehicle = $record->vehicles()->updateOrCreate(
+                                    ['id' => $vehicleData['id'] ?? null],
+                                    $vehicleData
+                                );
+                                $processedIds[] = $vehicle->id;
+                            }
+
+                            // Eliminamos permanentemente los que el usuario quitó en la interfaz (Solo si es Admin)
+                            if (auth()->user()?->role === 'Administrador') {
+                                $record->vehicles()->whereNotIn('id', $processedIds)->forceDelete();
+                            }
+
+                            \App\Models\AuditLog::registrar(
+                                accion: \App\Models\AuditLog::ACCION_UPDATE,
+                                descripcion: "Vehículos del cliente {$record->nombre} {$record->apellido} actualizados (Total: " . count($processedIds) . ")",
+                                modelo: 'Vehicle',
+                                modeloId: $record->id
                             );
-                            $processedIds[] = $vehicle->id;
+
+                            Notification::make()
+                                ->title('Vehículos Actualizados')
+                                ->body("Se han guardado los cambios en los vehículos de {$record->nombre} {$record->apellido}")
+                                ->success()
+                                ->send();
+                        } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+                            Notification::make()
+                                ->title('Placa Duplicada')
+                                ->body('No se pudo guardar: Una de las placas ingresadas ya pertenece a otro vehículo en el sistema.')
+                                ->danger()
+                                ->persistent()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Error al actualizar vehículos')
+                                ->body('Ocurrió un error inesperado: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
                         }
-
-                        // Eliminamos permanentemente los que el usuario quitó en la interfaz (Solo si es Admin)
-                        if (auth()->user()?->role === 'Administrador') {
-                            $record->vehicles()->whereNotIn('id', $processedIds)->forceDelete();
-                        }
-
-                        \App\Models\AuditLog::registrar(
-                            accion: \App\Models\AuditLog::ACCION_UPDATE,
-                            descripcion: "Vehículos del cliente {$record->nombre} {$record->apellido} actualizados (Total: " . count($processedIds) . ")",
-                            modelo: 'Vehicle',
-                            modeloId: $record->id
-                        );
-
-                        Notification::make()
-                            ->title('Vehículos Actualizados')
-                            ->body("Se han guardado los cambios en los vehículos de {$record->nombre} {$record->apellido}")
-                            ->success()
-                            ->send();
                     })
                     ->modalSubmitActionLabel('Guardar Cambios')
                     ->modalCancelActionLabel('Cancelar')
