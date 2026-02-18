@@ -55,4 +55,14 @@ class Service extends Model
     {
         return $this->hasMany(SalesItem::class);
     }
+
+    public function items()
+    {
+        return $this->hasMany(ServiceOrderItem::class);
+    }
+
+    public function hasLinkedRecords(): bool
+    {
+        return $this->items()->exists() || $this->salesItems()->exists();
+    }
 }

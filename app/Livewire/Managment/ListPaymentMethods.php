@@ -166,10 +166,20 @@ class ListPaymentMethods extends Component implements HasActions, HasSchemas, Ha
                 DeleteAction::make()
                     ->label('')
                     ->tooltip('Eliminar')
+                    ->modalHeading('Borrar método de pago')
                     ->size('lg')
                     ->visible(fn () => auth()->user()?->role === 'Administrador')
                     ->iconButton()
                     ->action(function (PaymentMethod $record) {
+                        if ($record->hasLinkedRecords()) {
+                            Notification::make()
+                                ->title('No se puede eliminar')
+                                ->body('no se puede eliminar un recurso con registros vinculados')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
                         $nombre = $record->nombre;
                         $record->delete();
                         AuditLog::registrar(

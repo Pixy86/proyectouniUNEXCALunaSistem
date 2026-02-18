@@ -32,5 +32,15 @@ class Customer extends Model
     {
         return $this->hasMany(related: Sale::class);
     }
+
+    public function serviceOrders()
+    {
+        return $this->hasMany(ServiceOrder::class);
+    }
+
+    public function hasLinkedRecords(): bool
+    {
+        return $this->vehicles()->exists() || $this->sales()->exists() || $this->serviceOrders()->exists();
+    }
 }
 

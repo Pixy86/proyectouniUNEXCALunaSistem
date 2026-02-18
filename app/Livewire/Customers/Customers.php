@@ -230,7 +230,7 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                     if ($v->hasServiceOrders()) {
                                         Notification::make()
                                             ->title("No se puede eliminar vehículo: {$v->placa}")
-                                            ->body("El vehículo con placa {$v->placa} no pudo ser eliminado porque tiene órdenes de servicio asociadas.")
+                                            ->body("No se puede eliminar un recurso con registros vinculados.")
                                             ->danger()
                                             ->persistent()
                                             ->send();
@@ -343,10 +343,20 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                 DeleteAction::make()
                     ->label('')
                     ->tooltip('Eliminar')
+                    ->modalHeading('Borrar cliente')
                     ->size('lg')
                     ->visible(fn () => auth()->user()?->role === 'Administrador')
                     ->iconButton()
                     ->action(function (Customer $record) {
+                        if ($record->hasLinkedRecords()) {
+                            Notification::make()
+                                ->title('No se puede eliminar')
+                                ->body('no se puede eliminar un recurso con registros vinculados')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
                         $nombre = "{$record->nombre} {$record->apellido}";
                         $record->delete();
                         \App\Models\AuditLog::registrar(

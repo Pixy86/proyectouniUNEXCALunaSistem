@@ -156,7 +156,7 @@ class CustomerVehicles extends Component implements HasForms, HasTable, HasActio
                         if ($record->hasServiceOrders()) {
                             Notification::make()
                                 ->title('No se puede eliminar')
-                                ->body('No se puede eliminar un vehículo con órdenes de servicio asociadas.')
+                                ->body('No se puede eliminar un recurso con registros vinculados.')
                                 ->danger()
                                 ->send();
                             return;

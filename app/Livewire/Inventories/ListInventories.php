@@ -180,10 +180,20 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
                 DeleteAction::make()
                     ->label('')
                     ->tooltip('Eliminar')
+                    ->modalHeading('Borrar producto del inventario')
                     ->iconButton()
                     ->size('lg')
                     ->visible(fn () => auth()->user()?->role === 'Administrador')
                     ->action(function (Inventory $record) {
+                        if ($record->hasLinkedRecords()) {
+                            Notification::make()
+                                ->title('No se puede eliminar')
+                                ->body('no se puede eliminar un recurso con registros vinculados')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
                         $nombre = $record->nombreProducto;
                         $record->delete();
                         \App\Models\AuditLog::registrar(

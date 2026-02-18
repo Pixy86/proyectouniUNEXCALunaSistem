@@ -245,10 +245,20 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                 DeleteAction::make()
                     ->label('')
                     ->tooltip('Eliminar')
+                    ->modalHeading('Borrar servicio')
                     ->size('lg')
                     ->visible(fn () => auth()->user()?->role === 'Administrador')
                     ->iconButton()
                     ->action(function (Service $record) {
+                        if ($record->hasLinkedRecords()) {
+                            Notification::make()
+                                ->title('No se puede eliminar')
+                                ->body('no se puede eliminar un recurso con registros vinculados')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
                         $nombre = $record->nombre;
                         $record->delete();
                         \App\Models\AuditLog::registrar(
