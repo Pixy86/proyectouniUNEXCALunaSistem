@@ -224,12 +224,25 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
 
                             // Eliminamos permanentemente los que el usuario quitó en la interfaz (Solo si es Admin)
                             if (auth()->user()?->role === 'Administrador') {
-                                $record->vehicles()->whereNotIn('id', $processedIds)->forceDelete();
+                                $vehiclesToDelete = $record->vehicles()->whereNotIn('id', $processedIds)->get();
+                                
+                                foreach ($vehiclesToDelete as $v) {
+                                    if ($v->hasServiceOrders()) {
+                                        Notification::make()
+                                            ->title("No se puede eliminar vehículo: {$v->placa}")
+                                            ->body("El vehículo con placa {$v->placa} no pudo ser eliminado porque tiene órdenes de servicio asociadas.")
+                                            ->danger()
+                                            ->persistent()
+                                            ->send();
+                                        continue; 
+                                    }
+                                    $v->forceDelete();
+                                }
                             }
 
                             \App\Models\AuditLog::registrar(
                                 accion: \App\Models\AuditLog::ACCION_UPDATE,
-                                descripcion: "Vehículos del cliente {$record->nombre} {$record->apellido} actualizados (Total: " . count($processedIds) . ")",
+                                descripcion: "Vehículos del cliente {$record->nombre} {$record->apellido} actualizados",
                                 modelo: 'Vehicle',
                                 modeloId: $record->id
                             );

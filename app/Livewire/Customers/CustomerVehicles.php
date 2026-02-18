@@ -153,6 +153,15 @@ class CustomerVehicles extends Component implements HasForms, HasTable, HasActio
                     ->modalDescription('¿Estás seguro de que deseas eliminar este vehículo? Esta acción no se puede deshacer.')
                     ->modalSubmitActionLabel('Sí, eliminar')
                     ->action(function (Vehicle $record) {
+                        if ($record->hasServiceOrders()) {
+                            Notification::make()
+                                ->title('No se puede eliminar')
+                                ->body('No se puede eliminar un vehículo con órdenes de servicio asociadas.')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
                         $record->delete();
                         Notification::make()
                             ->title('Vehículo eliminado exitosamente')

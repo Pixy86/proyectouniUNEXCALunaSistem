@@ -25,4 +25,14 @@ class Vehicle extends Model
     {
         return $this->belongsTo(Customer::class);
     }
+
+    public function serviceOrders()
+    {
+        return $this->hasMany(ServiceOrder::class);
+    }
+
+    public function hasServiceOrders(): bool
+    {
+        return $this->serviceOrders()->exists();
+    }
 }
