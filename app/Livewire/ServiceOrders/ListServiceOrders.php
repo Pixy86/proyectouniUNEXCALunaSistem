@@ -345,9 +345,12 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                             Select::make('service_id')
                                 ->label('Servicio')
                                 ->placeholder('Seleccionar servicio...')
-                                ->options(Service::where('estado', true)->with('inventories')->get()->mapWithKeys(fn ($s) => [
-                                    $s->id => "{$s->nombre} - \${$s->precio}" . ($s->cantidad > 0 ? ' ✓' : ' ✗ Sin Stock')
-                                ]))
+                                ->options(Service::where('estado', true)
+                                    ->get()
+                                    ->filter(fn ($s) => $s->cantidad > 0)
+                                    ->mapWithKeys(fn ($s) => [
+                                        $s->id => "{$s->nombre} - \${$s->precio}"
+                                    ]))
                                 ->searchable()
                                 ->required(),
                             TextInput::make('quantity')
@@ -392,6 +395,16 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
         foreach ($items as $item) {
             $service = Service::with('inventories')->find($item['service_id']);
             if (!$service) continue;
+
+            // Primero verificamos la capacidad general del servicio
+            if ($service->cantidad <= 0) {
+                Notification::make()
+                    ->title('Stock Insuficiente')
+                    ->body("No hay stock disponible para el servicio: {$service->nombre}")
+                    ->danger()
+                    ->send();
+                return false;
+            }
 
             foreach ($service->inventories as $inventory) {
                 // quantity viene en el pivot

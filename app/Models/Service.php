@@ -39,7 +39,7 @@ class Service extends Model
         $inventories = $this->inventories;
 
         if ($inventories->isEmpty()) {
-            return 0;
+            return 999;
         }
 
         return $inventories->min(function ($inventory) {
