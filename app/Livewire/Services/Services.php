@@ -250,6 +250,15 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                     ->visible(fn () => auth()->user()?->role === 'Administrador')
                     ->iconButton()
                     ->action(function (Service $record) {
+                        if ($record->hasOpenOrders()) {
+                            Notification::make()
+                                ->title('No se puede eliminar')
+                                ->body('No se puede eliminar un servicio con movimientos asociados con ordenes de servicio abiertas para ejecutar')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
                         if ($record->hasLinkedRecords()) {
                             Notification::make()
                                 ->title('No se puede eliminar')

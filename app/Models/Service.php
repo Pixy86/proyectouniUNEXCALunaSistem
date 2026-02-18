@@ -65,4 +65,11 @@ class Service extends Model
     {
         return $this->items()->exists() || $this->salesItems()->exists();
     }
+
+    public function hasOpenOrders(): bool
+    {
+        return $this->items()->whereHas('serviceOrder', function ($query) {
+            $query->whereIn('status', [ServiceOrder::STATUS_ABIERTA, ServiceOrder::STATUS_EN_PROCESO]);
+        })->exists();
+    }
 }
