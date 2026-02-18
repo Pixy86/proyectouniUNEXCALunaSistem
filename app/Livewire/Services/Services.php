@@ -112,15 +112,15 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                     ->state(fn (Service $record): string =>
                         $record->inventories->isNotEmpty() 
                             ? $record->inventories->map(fn ($inv) => $inv->nombreProducto . ' (x' . $inv->pivot->quantity . ')')->join(', ')
-                            : 'Mano de Obra'
+                            : '-'
                     )
                     ->wrap(),
                 TextColumn::make('cantidad_disponible')
                     ->label('Disponibilidad')
-                    ->state(fn (Service $record): string => $record->cantidad === -1 ? 'Mano de Obra' : (string)$record->cantidad)
+                    ->state(fn (Service $record): string => $record->cantidad === -1 ? '-' : (string)$record->cantidad)
                     ->badge()
                     ->color(fn (Service $record): string => 
-                        $record->cantidad === -1 ? 'info' : ($record->cantidad > 0 ? 'success' : 'danger')
+                        $record->cantidad === -1 ? 'gray' : ($record->cantidad > 0 ? 'success' : 'danger')
                     )
                     ->sortable(false),
                 IconColumn::make('estado')
