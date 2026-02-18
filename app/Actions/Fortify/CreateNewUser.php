@@ -29,7 +29,7 @@ class CreateNewUser implements CreatesNewUsers
                 Rule::unique(User::class),
             ],
             'password' => $this->passwordRules(),
-        ])->validate([
+        ], [
             'name.required' => 'El nombre es obligatorio.',
             'name.regex' => 'El nombre no puede contener números ni caracteres especiales.',
             'name.string' => 'El nombre debe ser un texto válido.',
@@ -39,7 +39,7 @@ class CreateNewUser implements CreatesNewUsers
             'password.required' => 'La contraseña es obligatoria.',
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
             'password.confirmed' => 'La confirmación de la contraseña no coincide.',
-        ]);
+        ])->validate();
 
         $user = User::create([
             'name' => $input['name'],
