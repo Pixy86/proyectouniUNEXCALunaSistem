@@ -101,6 +101,11 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                     ->modalSubmitActionLabel('Guardar Orden')
                     ->modalCancelActionLabel('Cancelar')
                     ->action(function (array $data) {
+                        // Validar stock antes de crear nada
+                        if (!$this->validateInventoryStock($data['items'])) {
+                            return;
+                        }
+
                         $order = ServiceOrder::create([
                             'customer_id' => $data['customer_id'],
                             'vehicle_id' => $data['vehicle_id'],
@@ -226,7 +231,6 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                     ->color('info')
                     ->iconButton()
                     ->visible(fn (ServiceOrder $record): bool => $record->status === ServiceOrder::STATUS_ABIERTA)
-                    ->visible(fn (ServiceOrder $record): bool => $record->status === ServiceOrder::STATUS_ABIERTA)
                     ->form($this->getOrderForm(true))
                     ->modalSubmitActionLabel('Actualizar Orden')
                     ->modalCancelActionLabel('Cancelar')
@@ -240,6 +244,11 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                         ])->toArray(),
                     ])
                     ->action(function (ServiceOrder $record, array $data) {
+                        // Validar stock antes de actualizar
+                        if (!$this->validateInventoryStock($data['items'])) {
+                            return;
+                        }
+
                         $oldData = $record->toArray();
                         $record->update([
                             'customer_id' => $data['customer_id'],
@@ -375,6 +384,41 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
             ],
             default => [],
         };
+    }
+
+    protected function validateInventoryStock(array $items): bool
+    {
+        $inventoryRequirements = [];
+        foreach ($items as $item) {
+            $service = Service::with('inventories')->find($item['service_id']);
+            if (!$service) continue;
+
+            foreach ($service->inventories as $inventory) {
+                // quantity viene en el pivot
+                $requiredTotal = $inventory->pivot->quantity * ($item['quantity'] ?? 1);
+                if (!isset($inventoryRequirements[$inventory->id])) {
+                    $inventoryRequirements[$inventory->id] = [
+                        'name' => $inventory->nombreProducto,
+                        'required' => 0,
+                        'available' => (int) $inventory->stockActual,
+                    ];
+                }
+                $inventoryRequirements[$inventory->id]['required'] += $requiredTotal;
+            }
+        }
+
+        foreach ($inventoryRequirements as $req) {
+            if ($req['required'] > $req['available']) {
+                \Filament\Notifications\Notification::make()
+                    ->title('Error de Stock')
+                    ->body("stock insuficiente para el producto ({$req['name']})")
+                    ->danger()
+                    ->send();
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public function render(): View
