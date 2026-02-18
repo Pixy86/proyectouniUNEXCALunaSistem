@@ -347,7 +347,7 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                                 ->placeholder('Seleccionar servicio...')
                                 ->options(Service::where('estado', true)
                                     ->get()
-                                    ->filter(fn ($s) => $s->cantidad > 0)
+                                    ->filter(fn ($s) => $s->cantidad > 0 || $s->cantidad === -1)
                                     ->mapWithKeys(fn ($s) => [
                                         $s->id => "{$s->nombre} - \${$s->precio}"
                                     ]))
@@ -396,8 +396,8 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
             $service = Service::with('inventories')->find($item['service_id']);
             if (!$service) continue;
 
-            // Primero verificamos la capacidad general del servicio
-            if ($service->cantidad <= 0) {
+            // Primero verificamos la capacidad general del servicio (0 significa agotado, -1 es mano de obra)
+            if ($service->cantidad === 0) {
                 Notification::make()
                     ->title('Stock Insuficiente')
                     ->body("No hay stock disponible para el servicio: {$service->nombre}")

@@ -87,6 +87,11 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
 
     public function table(Table $table): Table
     {
+        // Sincronizar estados antes de mostrar la tabla
+        Service::where('estado', true)
+            ->get()
+            ->each(fn($s) => $s->syncStatusWithStock());
+
         return $table
             ->query(fn (): Builder => Service::query()->with('inventories'))
             ->columns([
@@ -102,19 +107,21 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                     ->label('Precio')
                     ->money('USD')
                     ->sortable(),
-                TextColumn::make('inventories')
+                TextColumn::make('inventories_count')
                     ->label('Productos')
-                    ->formatStateUsing(fn (Service $record): string =>
-                        $record->inventories->map(fn ($inv) =>
-                            $inv->nombreProducto . ' (x' . $inv->pivot->quantity . ')'
-                        )->join(', ') ?: 'Sin productos'
+                    ->state(fn (Service $record): string =>
+                        $record->inventories->isNotEmpty() 
+                            ? $record->inventories->map(fn ($inv) => $inv->nombreProducto . ' (x' . $inv->pivot->quantity . ')')->join(', ')
+                            : 'Mano de Obra'
                     )
                     ->wrap(),
                 TextColumn::make('cantidad_disponible')
-                    ->label('Cantidad Disponible')
-                    ->state(fn (Service $record): int => $record->cantidad)
+                    ->label('Disponibilidad')
+                    ->state(fn (Service $record): string => $record->cantidad === -1 ? 'Mano de Obra' : (string)$record->cantidad)
                     ->badge()
-                    ->color(fn (int $state): string => $state > 0 ? 'success' : 'danger')
+                    ->color(fn (Service $record): string => 
+                        $record->cantidad === -1 ? 'info' : ($record->cantidad > 0 ? 'success' : 'danger')
+                    )
                     ->sortable(false),
                 IconColumn::make('estado')
                     ->label('Estado')

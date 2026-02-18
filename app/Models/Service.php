@@ -18,6 +18,18 @@ class Service extends Model
         'estado',
     ];
 
+    public static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($service) {
+            // Auto-desactivar si el stock es 0 (solo si tiene inventario vinculado)
+            if (!$service->isLaborOnly() && $service->cantidad <= 0) {
+                $service->estado = false;
+            }
+        });
+    }
+
     /**
      * Relación muchos-a-muchos con inventarios.
      * Cada producto tiene una cantidad que el servicio consume.
@@ -39,7 +51,7 @@ class Service extends Model
         $inventories = $this->inventories;
 
         if ($inventories->isEmpty()) {
-            return 999;
+            return -1; // Usaremos -1 para indicar que es solo Mano de Obra (sin stock limitado)
         }
 
         return $inventories->min(function ($inventory) {
@@ -63,13 +75,29 @@ class Service extends Model
 
     public function hasLinkedRecords(): bool
     {
-        return $this->items()->exists() || $this->salesItems()->exists();
+        // Solo contamos items vinculados a órdenes que NO estén en la papelera
+        return $this->items()->whereHas('serviceOrder', function ($query) {
+            $query->withoutTrashed();
+        })->exists() || $this->salesItems()->exists();
+    }
+
+    public function isLaborOnly(): bool
+    {
+        return $this->inventories()->doesntExist();
     }
 
     public function hasOpenOrders(): bool
     {
         return $this->items()->whereHas('serviceOrder', function ($query) {
-            $query->whereIn('status', [ServiceOrder::STATUS_ABIERTA, ServiceOrder::STATUS_EN_PROCESO]);
+            $query->whereIn('status', [ServiceOrder::STATUS_ABIERTA, ServiceOrder::STATUS_EN_PROCESO])
+                  ->withoutTrashed();
         })->exists();
+    }
+
+    public function syncStatusWithStock(): void
+    {
+        if (!$this->isLaborOnly() && $this->cantidad <= 0) {
+            $this->update(['estado' => false]);
+        }
     }
 }
