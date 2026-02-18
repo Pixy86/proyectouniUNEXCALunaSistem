@@ -153,23 +153,31 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                                     ->required()
                                                     ->placeholder('Ej: ABC123')
                                                     ->distinct()
-                                                    ->unique('vehicles', 'placa', ignoreRecord: true)
                                                     ->validationMessages([
-                                                        'unique' => 'Esta placa ya ha sido registrada por otro cliente.',
-                                                        'distinct' => 'No puedes registrar dos vehículos con la misma placa en la misma lista.',
+                                                        'required' => 'La placa es obligatoria.',
+                                                        'distinct' => 'No puedes repetir la misma placa en la lista.',
                                                     ]),
                                                 TextInput::make('marca')
                                                     ->label('Marca')
                                                     ->required()
-                                                    ->placeholder('Ej: Toyota'),
+                                                    ->placeholder('Ej: Toyota')
+                                                    ->validationMessages([
+                                                        'required' => 'La marca es obligatoria.',
+                                                    ]),
                                                 TextInput::make('modelo')
                                                     ->label('Modelo')
                                                     ->required()
-                                                    ->placeholder('Ej: Corolla'),
+                                                    ->placeholder('Ej: Corolla')
+                                                    ->validationMessages([
+                                                        'required' => 'El modelo es obligatorio.',
+                                                    ]),
                                                 TextInput::make('color')
                                                     ->label('Color')
                                                     ->required()
-                                                    ->placeholder('Ej: Blanco'),
+                                                    ->placeholder('Ej: Blanco')
+                                                    ->validationMessages([
+                                                        'required' => 'El color es obligatorio.',
+                                                    ]),
                                                 Select::make('tipo_vehiculo')
                                                     ->label('Tipo de Vehículo')
                                                     ->options([
@@ -180,7 +188,10 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                                         'Otros' => 'Otros',
                                                     ])
                                                     ->required()
-                                                    ->placeholder('Seleccione...'),
+                                                    ->placeholder('Seleccione...')
+                                                    ->validationMessages([
+                                                        'required' => 'El tipo de vehículo es obligatorio.',
+                                                    ]),
                                                 Toggle::make('estado')
                                                     ->label('Activo')
                                                     ->default(true)
