@@ -56,7 +56,11 @@ class CustomerVehicles extends Component implements HasForms, HasTable, HasActio
                         TextInput::make('modelo')
                             ->required(),
                         TextInput::make('color')
-                            ->required(),
+                            ->required()
+                            ->regex('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u')
+                            ->validationMessages([
+                                'regex' => 'El campo color no debe contener números.',
+                            ]),
                         Select::make('tipo_vehiculo')
                             ->label('Tipo de Vehículo')
                             ->options([
@@ -119,7 +123,11 @@ class CustomerVehicles extends Component implements HasForms, HasTable, HasActio
                         TextInput::make('modelo')
                             ->required(),
                         TextInput::make('color')
-                            ->required(),
+                            ->required()
+                            ->regex('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u')
+                            ->validationMessages([
+                                'regex' => 'El campo color no debe contener números.',
+                            ]),
                         Select::make('tipo_vehiculo')
                             ->label('Tipo de Vehículo')
                             ->options([

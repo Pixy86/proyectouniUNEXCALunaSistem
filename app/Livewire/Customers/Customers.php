@@ -191,8 +191,10 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                                     ->label('Color')
                                                     ->required()
                                                     ->placeholder('Ej: Blanco')
+                                                    ->regex('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u')
                                                     ->validationMessages([
                                                         'required' => 'El color es obligatorio.',
+                                                        'regex' => 'El campo color no debe contener números.',
                                                     ]),
                                                 Select::make('tipo_vehiculo')
                                                     ->label('Tipo de Vehículo')
