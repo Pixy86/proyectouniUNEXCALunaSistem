@@ -84,9 +84,17 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                             ->numeric()
                                             ->unique('customers', 'cedula_rif'),
                                         TextInput::make('nombre')
-                                            ->required(),
+                                            ->required()
+                                            ->regex('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u')
+                                            ->validationMessages([
+                                                'regex' => 'El nombre solo debe contener letras.',
+                                            ]),
                                         TextInput::make('apellido')
-                                            ->required(),
+                                            ->required()
+                                            ->regex('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u')
+                                            ->validationMessages([
+                                                'regex' => 'El apellido solo debe contener letras.',
+                                            ]),
                                         Toggle::make('estado')
                                             ->label('Cliente Activo')
                                             ->default(true)
@@ -101,10 +109,18 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                         TextInput::make('telefono')
                                             ->label('Teléfono Principal')
                                             ->tel()
-                                            ->required(),
+                                            ->required()
+                                            ->regex('/^[0-9]+$/')
+                                            ->validationMessages([
+                                                'regex' => 'El teléfono solo debe contener números.',
+                                            ]),
                                         TextInput::make('telefono_secundario')
                                             ->label('Teléfono Secundario')
-                                            ->tel(),
+                                            ->tel()
+                                            ->regex('/^[0-9]+$/')
+                                            ->validationMessages([
+                                                'regex' => 'El teléfono solo debe contener números.',
+                                            ]),
                                         TextInput::make('email')
                                             ->email()
                                             ->placeholder('correo@ejemplo.com'),
@@ -308,12 +324,24 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                             ->numeric()
                                             ->required(),
                                         TextInput::make('nombre')
-                                            ->required(),
+                                            ->required()
+                                            ->regex('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u')
+                                            ->validationMessages([
+                                                'regex' => 'El nombre solo debe contener letras.',
+                                            ]),
                                         TextInput::make('apellido')
-                                            ->required(),
+                                            ->required()
+                                            ->regex('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u')
+                                            ->validationMessages([
+                                                'regex' => 'El apellido solo debe contener letras.',
+                                            ]),
                                         TextInput::make('telefono')
                                             ->tel()
-                                            ->required(),
+                                            ->required()
+                                            ->regex('/^[0-9]+$/')
+                                            ->validationMessages([
+                                                'regex' => 'El teléfono solo debe contener números.',
+                                            ]),
                                         TextInput::make('email')
                                             ->email(),
                                         Toggle::make('estado')
