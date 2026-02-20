@@ -194,8 +194,7 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                     ->color('warning')
                     ->iconButton()
                     ->visible(fn (ServiceOrder $record): bool => 
-                        $record->status !== ServiceOrder::STATUS_TERMINADO && 
-                        $record->status !== ServiceOrder::STATUS_CANCELADA &&
+                        $record->status === ServiceOrder::STATUS_ABIERTA && 
                         in_array(auth()->user()?->role, ['Administrador', 'Encargado'])
                     )
                     ->form([
@@ -380,10 +379,6 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
         return match ($currentStatus) {
             ServiceOrder::STATUS_ABIERTA => [
                 ServiceOrder::STATUS_EN_PROCESO => 'En Proceso',
-                ServiceOrder::STATUS_TERMINADO => 'Terminado',
-            ],
-            ServiceOrder::STATUS_EN_PROCESO => [
-                ServiceOrder::STATUS_TERMINADO => 'Terminado',
             ],
             default => [],
         };
