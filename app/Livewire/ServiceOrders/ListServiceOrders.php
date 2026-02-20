@@ -49,7 +49,7 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                 TextColumn::make('customer.nombre')
                     ->label('Cliente')
                     ->formatStateUsing(fn (ServiceOrder $record): string => "{$record->customer->nombre} {$record->customer->apellido}")
-                    ->searchable(['customer.nombre', 'customer.apellido'])
+                    ->searchable(['nombre', 'apellido'])
                     ->sortable(),
                 TextColumn::make('vehicle.placa')
                     ->label('Vehículo')
