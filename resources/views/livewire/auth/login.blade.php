@@ -5,6 +5,12 @@
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
 
+        @if (session('status') === 'password-changed')
+            <div class="rounded-lg border border-emerald-400/40 bg-emerald-50 dark:bg-emerald-900/20 px-4 py-3 text-center text-sm text-emerald-700 dark:text-emerald-300">
+                ✅ Tu contraseña fue actualizada correctamente. Por favor inicia sesión con tu nueva contraseña.
+            </div>
+        @endif
+
         <form method="POST" action="{{ route('login.store') }}" class="flex flex-col gap-6">
             @csrf
 

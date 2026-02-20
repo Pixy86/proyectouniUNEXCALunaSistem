@@ -233,17 +233,26 @@ class Venta extends Component
     // Procesa la venta: valida datos, registra en BD, actualiza inventario y reinicia el carrito
     public function checkout()
     {
+        $total = $this->total;
+
         $this->validate([
-            'customer_id' => 'required|exists:customers,id',
-            'vehicle_id' => 'nullable|exists:vehicles,id',
-            'payment_method_id' => 'required|exists:payment_methods,id',
-            'cart' => 'required|array|min:1',
-            'paid_amount' => 'required|numeric|min:0',
-            'discount_percentage' => 'nullable|numeric|min:0|max:100',
+            'customer_id'          => 'required|exists:customers,id',
+            'vehicle_id'           => 'nullable|exists:vehicles,id',
+            'payment_method_id'    => 'required|exists:payment_methods,id',
+            'cart'                 => 'required|array|min:1',
+            'paid_amount'          => ['required', 'numeric', 'min:0', function ($attribute, $value, $fail) use ($total) {
+                if ((float) $value < (float) $total) {
+                    $fail('El monto pagado no cubre el total. Debe ingresar al menos $' . number_format($total, 2) . '.');
+                }
+            }],
+            'discount_percentage'  => 'nullable|numeric|min:0|max:100',
         ], [
-            'customer_id.required' => 'Debe seleccionar un cliente.',
+            'customer_id.required'       => 'Debe seleccionar un cliente.',
             'payment_method_id.required' => 'Debe seleccionar un método de pago.',
-            'cart.required' => 'El carrito no puede estar vacío.',
+            'cart.required'              => 'El carrito no puede estar vacío.',
+            'discount_percentage.max'    => 'El descuento no puede ser mayor al 100%.',
+            'discount_percentage.min'    => 'El descuento no puede ser negativo.',
+            'paid_amount.required'       => 'Debe ingresar el monto pagado.',
         ]);
 
         // Wrappear todo en una transacción de base de datos para asegurar integridad

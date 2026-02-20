@@ -16,6 +16,8 @@ class Profile extends Component
 
     public string $email = '';
 
+    public string $telefono = '';
+
     public string $current_password = '';
 
     public string $password = '';
@@ -29,6 +31,7 @@ class Profile extends Component
     {
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
+        $this->telefono = Auth::user()->telefono ?? '';
     }
 
     /**
@@ -49,6 +52,16 @@ class Profile extends Component
                 'max:255',
                 Rule::unique(User::class)->ignore($user->id),
             ],
+
+            'telefono' => [
+                'nullable',
+                'string',
+                'max:20',
+                'regex:/^[0-9]+$/',
+            ],
+        ], [
+            'telefono.regex' => 'El teléfono solo debe contener números.',
+            'telefono.max'   => 'El teléfono no puede superar los 20 dígitos.',
         ]);
 
         $user->fill($validated);
@@ -71,6 +84,10 @@ class Profile extends Component
             $validated = $this->validate([
                 'current_password' => ['required', 'string', 'current_password'],
                 'password' => ['required', 'string', PasswordRule::defaults(), 'confirmed'],
+            ], [
+                'current_password.current_password' => 'La contraseña actual es incorrecta.',
+                'password.confirmed'                => 'Las contraseñas no coinciden.',
+                'password.min'                      => 'La contraseña debe tener al menos 8 caracteres.',
             ]);
         } catch (ValidationException $e) {
             $this->reset('current_password', 'password', 'password_confirmation');
@@ -84,7 +101,14 @@ class Profile extends Component
 
         $this->reset('current_password', 'password', 'password_confirmation');
 
-        $this->dispatch('password-updated');
+        // CU-14.2: Cerrar sesión y redirigir al login tras cambio exitoso de contraseña
+        Auth::logout();
+        Session::invalidate();
+        Session::regenerateToken();
+
+        Session::flash('status', 'password-changed');
+
+        $this->redirect(route('login'), navigate: false);
     }
 
     /**

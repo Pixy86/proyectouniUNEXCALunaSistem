@@ -24,6 +24,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'telefono',
         'role', // Roles: 'Administrador', 'Encargado', 'Recepcionista'
         'estado', // true = activo, false = inactivo
     ];

@@ -29,7 +29,7 @@
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Inicio')" class="nav-group grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
-                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Dashboard') }}</span>
+                        <span x-show="sidebarExpanded" x-transition.opacity>{{ __('Tablero') }}</span>
                     </flux:navlist.item>
                 </flux:navlist.group>
 
@@ -101,6 +101,7 @@
                                 <div class="grid flex-1 text-start text-sm leading-tight">
                                     <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
                                     <span class="truncate text-xs">{{ auth()->user()->email }}</span>
+                                    <span class="truncate text-xs font-medium text-indigo-400">{{ auth()->user()->role ?? 'Sin rol' }}</span>
                                 </div>
                             </div>
                         </div>
@@ -151,6 +152,7 @@
                                 <div class="grid flex-1 text-start text-sm leading-tight">
                                     <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
                                     <span class="truncate text-xs">{{ auth()->user()->email }}</span>
+                                    <span class="truncate text-xs font-medium text-indigo-400">{{ auth()->user()->role ?? 'Sin rol' }}</span>
                                 </div>
                             </div>
                         </div>

@@ -323,8 +323,10 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                 \Filament\Schemas\Components\Grid::make(2)
                                     ->schema([
                                         TextInput::make('cedula_rif')
+                                            ->label('Cédula / RIF')
                                             ->numeric()
-                                            ->required(),
+                                            ->required()
+                                            ->unique('customers', 'cedula_rif', ignoreRecord: true),
                                         TextInput::make('nombre')
                                             ->required()
                                             ->regex('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u')
@@ -338,18 +340,30 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                                 'regex' => 'El apellido solo debe contener letras.',
                                             ]),
                                         TextInput::make('telefono')
+                                            ->label('Teléfono Principal')
                                             ->tel()
                                             ->required()
                                             ->regex('/^[0-9]+$/')
                                             ->validationMessages([
                                                 'regex' => 'El teléfono solo debe contener números.',
                                             ]),
+                                        TextInput::make('telefono_secundario')
+                                            ->label('Teléfono Secundario')
+                                            ->tel()
+                                            ->regex('/^[0-9]+$/')
+                                            ->validationMessages([
+                                                'regex' => 'El teléfono solo debe contener números.',
+                                            ]),
                                         TextInput::make('email')
-                                            ->email(),
+                                            ->email()
+                                            ->placeholder('correo@ejemplo.com'),
                                         Toggle::make('estado')
                                             ->label('Activo')
                                             ->onColor('success'),
                                     ]),
+                                Textarea::make('direccion')
+                                    ->label('Dirección de Habitación')
+                                    ->rows(3),
                             ]),
 
                     ])
@@ -381,7 +395,7 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                         if ($record->hasLinkedRecords()) {
                             Notification::make()
                                 ->title('No se puede eliminar')
-                                ->body('no se puede eliminar un recurso con registros vinculados')
+                                ->body('No se puede eliminar un recurso con registros vinculados.')
                                 ->danger()
                                 ->send();
                             return;

@@ -2,7 +2,7 @@
     {{-- Header --}}
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Panel de Control</h1>
+            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Tablero</h1>
             <p class="text-base text-gray-500 dark:text-gray-400">Resumen operativo y métricas en tiempo real</p>
         </div>
         <div class="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-full w-fit">

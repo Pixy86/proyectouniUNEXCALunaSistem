@@ -294,14 +294,27 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                     ->modalDescription('¿Estás seguro de que deseas cancelar esta orden? Esta acción no se puede deshacer.')
                     ->action(function (ServiceOrder $record) {
                         $record->update(['status' => ServiceOrder::STATUS_CANCELADA]);
+
+                        // Revertir stock de inventario por cada servicio en la orden
+                        foreach ($record->items as $item) {
+                            $service = $item->service;
+                            if (!$service) continue;
+
+                            foreach ($service->inventories as $inventory) {
+                                $requiredQty = $inventory->pivot->quantity * $item->quantity;
+                                $inventory->increment('stockActual', $requiredQty);
+                            }
+                        }
+
                         \App\Models\AuditLog::registrar(
                             accion: \App\Models\AuditLog::ACCION_UPDATE,
-                            descripcion: "Orden de servicio #{$record->id} cancelada",
+                            descripcion: "Orden de servicio #{$record->id} cancelada (stock de inventario revertido)",
                             modelo: 'ServiceOrder',
                             modeloId: $record->id
                         );
                         Notification::make()
                             ->title('Orden Cancelada')
+                            ->body('El stock del inventario ha sido restaurado.')
                             ->success()
                             ->send();
                     }),

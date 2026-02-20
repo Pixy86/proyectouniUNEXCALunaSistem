@@ -44,11 +44,19 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                         ->schema([
                             TextInput::make('nombre')
                                 ->required()
-                                ->maxLength(255),
+                                ->maxLength(255)
+                                ->unique('services', 'nombre', ignoreRecord: true)
+                                ->validationMessages([
+                                    'unique' => 'Ya existe un servicio con este nombre.',
+                                ]),
                             TextInput::make('precio')
                                 ->numeric()
                                 ->prefix('$')
-                                ->required(),
+                                ->minValue(0.01)
+                                ->required()
+                                ->validationMessages([
+                                    'min' => 'Los valores numéricos deben ser positivos.',
+                                ]),
                             Toggle::make('estado')
                                 ->label('Activo')
                                 ->default(true)
@@ -257,19 +265,10 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                     ->visible(fn () => auth()->user()?->role === 'Administrador')
                     ->iconButton()
                     ->action(function (Service $record) {
-                        if ($record->hasOpenOrders()) {
+                        if ($record->hasOpenOrders() || $record->hasLinkedRecords()) {
                             Notification::make()
                                 ->title('No se puede eliminar')
-                                ->body('No se puede eliminar un servicio con movimientos asociados con ordenes de servicio abiertas para ejecutar')
-                                ->danger()
-                                ->send();
-                            return;
-                        }
-
-                        if ($record->hasLinkedRecords()) {
-                            Notification::make()
-                                ->title('No se puede eliminar')
-                                ->body('no se puede eliminar un recurso con registros vinculados')
+                                ->body('No se puede eliminar un servicio con historial de uso. Puede inactivar el servicio para mantener la integridad de los registros.')
                                 ->danger()
                                 ->send();
                             return;

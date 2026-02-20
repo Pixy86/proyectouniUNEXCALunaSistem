@@ -29,6 +29,6 @@ class Inventory extends Model
 
     public function hasLinkedRecords(): bool
     {
-        return $this->services()->whereHas('items')->exists();
+        return $this->stockActual > 0 || $this->services()->exists();
     }
 }

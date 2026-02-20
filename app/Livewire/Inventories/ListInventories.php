@@ -86,12 +86,20 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
                                         TextInput::make('nombreProducto')
                                             ->label('Nombre del Producto')
                                             ->required()
-                                            ->maxLength(255),
+                                            ->maxLength(255)
+                                            ->unique('inventories', 'nombreProducto')
+                                            ->validationMessages([
+                                                'unique' => 'Este producto ya se encuentra registrado.',
+                                            ]),
                                         TextInput::make('stockActual')
                                             ->label('Stock Inicial')
                                             ->numeric()
-                                            ->default(0)
-                                            ->required(),
+                                            ->default(1)
+                                            ->minValue(1)
+                                            ->required()
+                                            ->validationMessages([
+                                                'min' => 'El stock debe ser al menos 1.',
+                                            ]),
                                         Toggle::make('estado')
                                             ->label('Activo')
                                             ->default(true)
@@ -157,11 +165,19 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
                                     ->schema([
                                         TextInput::make('nombreProducto')
                                             ->label('Nombre del Producto')
-                                            ->required(),
+                                            ->required()
+                                            ->unique('inventories', 'nombreProducto', ignoreRecord: true)
+                                            ->validationMessages([
+                                                'unique' => 'Ya existe un producto con ese nombre.',
+                                            ]),
                                         TextInput::make('stockActual')
                                             ->label('Stock Actual')
                                             ->numeric()
-                                            ->required(),
+                                            ->minValue(1)
+                                            ->required()
+                                            ->validationMessages([
+                                                'min' => 'El stock debe ser al menos 1.',
+                                            ]),
                                         Toggle::make('estado')
                                             ->label('Activo')
                                             ->onColor('success'),
@@ -188,7 +204,7 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
                         if ($record->hasLinkedRecords()) {
                             Notification::make()
                                 ->title('No se puede eliminar')
-                                ->body('no se puede eliminar un recurso con registros vinculados')
+                                ->body('No se puede eliminar un producto con existencias o vinculado a un servicio.')
                                 ->danger()
                                 ->send();
                             return;

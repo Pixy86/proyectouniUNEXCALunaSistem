@@ -58,6 +58,9 @@ class ListSales extends Component implements HasActions, HasSchemas, HasTable
                     ->dateTime()
                     ->sortable(),
             ])
+            ->defaultSort('created_at', 'desc')
+            ->paginated([10, 25, 50])
+            ->paginationPageOptions([10, 25, 50])
             ->filters([
                 //
             ])

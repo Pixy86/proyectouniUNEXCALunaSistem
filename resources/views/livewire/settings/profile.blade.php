@@ -13,7 +13,7 @@
                 <div>
                     <flux:input wire:model="email" :label="__('Correo Electrónico')" type="email" required autocomplete="email" />
 
-                    @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
+                    @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! auth()->user()->hasVerifiedEmail())
                         <div>
                             <flux:text class="mt-4">
                                 {{ __('Tu dirección de correo electrónico no está verificada.') }}
@@ -30,6 +30,35 @@
                             @endif
                         </div>
                     @endif
+                </div>
+
+                {{-- Rol (solo lectura) --}}
+                <div>
+                    <flux:input
+                        :label="__('Rol')"
+                        :value="auth()->user()->role ?? 'Sin rol asignado'"
+                        type="text"
+                        readonly
+                        disabled
+                        class="opacity-60 cursor-not-allowed"
+                    />
+                    <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">El rol de la cuenta no puede ser modificado desde aquí.</p>
+                </div>
+
+                {{-- Teléfono --}}
+                <div>
+                    <flux:input
+                        wire:model="telefono"
+                        :label="__('Teléfono')"
+                        type="text"
+                        inputmode="numeric"
+                        placeholder="Ej: 04121234567"
+                        autocomplete="tel"
+                        maxlength="20"
+                    />
+                    @error('telefono')
+                        <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div class="flex items-center gap-4">
@@ -49,27 +78,77 @@
             <flux:heading>{{ __('Actualizar contraseña') }}</flux:heading>
             <flux:subheading>{{ __('Asegúrate de que tu cuenta esté usando una contraseña larga y aleatoria para mantenerse segura') }}</flux:subheading>
 
-            <form wire:submit="updatePassword" class="mt-6 space-y-6">
+        <form wire:submit="updatePassword" class="mt-6 space-y-6">
                 <flux:input
                     wire:model="current_password"
                     :label="__('Contraseña actual')"
                     type="password"
                     required
                     autocomplete="current-password"
+                    viewable
                 />
-                <flux:input
-                    wire:model="password"
-                    :label="__('Nueva contraseña')"
-                    type="password"
-                    required
-                    autocomplete="new-password"
-                />
+
+                {{-- Nueva contraseña con indicador de fortaleza --}}
+                <div>
+                    <flux:input
+                        wire:model="password"
+                        id="settings-password-input"
+                        :label="__('Nueva contraseña')"
+                        type="password"
+                        required
+                        minlength="8"
+                        autocomplete="new-password"
+                        viewable
+                    />
+                    <div class="mt-2">
+                        <div class="flex items-center gap-2 mb-1">
+                            <div class="flex-1 h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                                <div id="settings-strength-bar" class="h-full transition-all duration-300 ease-out" style="width: 0%"></div>
+                            </div>
+                            <span id="settings-strength-text" class="text-xs font-medium min-w-[80px] text-right"></span>
+                        </div>
+                        <p class="text-xs text-zinc-500 dark:text-zinc-400">Mínimo 8 caracteres. Puedes usar números y caracteres especiales.</p>
+                    </div>
+                </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const pwInput = document.getElementById('settings-password-input');
+                        const bar = document.getElementById('settings-strength-bar');
+                        const label = document.getElementById('settings-strength-text');
+                        if (!pwInput) return;
+                        pwInput.addEventListener('input', function () {
+                            let s = 0, p = this.value;
+                            if (p.length === 0) { bar.style.width='0%'; label.textContent=''; return; }
+                            if (p.length >= 8)  s += 25;
+                            if (p.length >= 12) s += 15;
+                            if (p.length >= 16) s += 10;
+                            if (/[a-z]/.test(p)) s += 15;
+                            if (/[A-Z]/.test(p)) s += 15;
+                            if (/[0-9]/.test(p)) s += 10;
+                            if (/[^a-zA-Z0-9]/.test(p)) s += 10;
+                            s = Math.min(100, s);
+                            let color, text;
+                            if (s < 40)       { color='#ef4444'; text='Débil'; }
+                            else if (s < 60)  { color='#f97316'; text='Regular'; }
+                            else if (s < 80)  { color='#eab308'; text='Buena'; }
+                            else              { color='#22c55e'; text='Fuerte'; }
+                            bar.style.width = s + '%';
+                            bar.style.backgroundColor = color;
+                            label.textContent = text;
+                            label.style.color = color;
+                        });
+                    });
+                </script>
+
                 <flux:input
                     wire:model="password_confirmation"
                     :label="__('Confirmar contraseña')"
                     type="password"
                     required
+                    minlength="8"
                     autocomplete="new-password"
+                    viewable
                 />
 
                 <div class="flex items-center gap-4">
