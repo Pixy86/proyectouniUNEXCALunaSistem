@@ -18,54 +18,76 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Administrador Principal (Acceso total al sistema)
-        User::factory()->create([
-            'name' => 'Josue',
-            'email' => 'josue@sgiosci.com',
-            'password' => bcrypt('admin123'),
-            'role' => 'Administrador',
-            'estado' => true,
-            'security_answer_1' => 'Mascota',
-            'security_answer_2' => 'Ciudad',
-            'security_answer_3' => 'Amigo',
-            'plain_password_encrypted' => Crypt::encryptString('admin123'),
-        ]);
+        User::updateOrCreate(
+            ['email' => 'admin@sgiosci.com'],
+            [
+                'name' => 'Administrador SGIOSCI',
+                'password' => bcrypt('admin123'),
+                'role' => 'Administrador',
+                'estado' => true,
+                'security_answer_1' => 'Mascota',
+                'security_answer_2' => 'Ciudad',
+                'security_answer_3' => 'Amigo',
+                'plain_password_encrypted' => Crypt::encryptString('admin123'),
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Usuario de Prueba',
-            'email' => 'usuariodeprueba@gmail.com',
-            'password' => bcrypt('admin123'),
-            'role' => 'Administrador',
-            'estado' => true,
-            'security_answer_1' => 'Mascota',
-            'security_answer_2' => 'Ciudad',
-            'security_answer_3' => 'Amigo',
-            'plain_password_encrypted' => Crypt::encryptString('admin123'),
-        ]);
+        User::updateOrCreate(
+            ['email' => 'josue@sgiosci.com'],
+            [
+                'name' => 'Josue',
+                'password' => bcrypt('admin123'),
+                'role' => 'Administrador',
+                'estado' => true,
+                'security_answer_1' => 'Mascota',
+                'security_answer_2' => 'Ciudad',
+                'security_answer_3' => 'Amigo',
+                'plain_password_encrypted' => Crypt::encryptString('admin123'),
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'usuariodeprueba@gmail.com'],
+            [
+                'name' => 'Usuario de Prueba',
+                'password' => bcrypt('admin123'),
+                'role' => 'Administrador',
+                'estado' => true,
+                'security_answer_1' => 'Mascota',
+                'security_answer_2' => 'Ciudad',
+                'security_answer_3' => 'Amigo',
+                'plain_password_encrypted' => Crypt::encryptString('admin123'),
+            ]
+        );
 
         // Perfiles de prueba para diferentes departamentos
-        User::factory()->create([
-            'name' => 'Juan Encargado',
-            'email' => 'juan@sgiosci.com',
-            'password' => bcrypt('password'),
-            'role' => 'Encargado',
-            'estado' => true,
-            'security_answer_1' => 'Mascota',
-            'security_answer_2' => 'Ciudad',
-            'security_answer_3' => 'Amigo',
-            'plain_password_encrypted' => Crypt::encryptString('password'),
-        ]);
+        User::updateOrCreate(
+            ['email' => 'juan@sgiosci.com'],
+            [
+                'name' => 'Juan Encargado',
+                'password' => bcrypt('password'),
+                'role' => 'Encargado',
+                'estado' => true,
+                'security_answer_1' => 'Mascota',
+                'security_answer_2' => 'Ciudad',
+                'security_answer_3' => 'Amigo',
+                'plain_password_encrypted' => Crypt::encryptString('password'),
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Maria Recepcionista',
-            'email' => 'maria@sgiosci.com',
-            'password' => bcrypt('password'),
-            'role' => 'Recepcionista',
-            'estado' => true,
-            'security_answer_1' => 'Mascota',
-            'security_answer_2' => 'Ciudad',
-            'security_answer_3' => 'Amigo',
-            'plain_password_encrypted' => Crypt::encryptString('password'),
-        ]);
+        User::updateOrCreate(
+            ['email' => 'maria@sgiosci.com'],
+            [
+                'name' => 'Maria Recepcionista',
+                'password' => bcrypt('password'),
+                'role' => 'Recepcionista',
+                'estado' => true,
+                'security_answer_1' => 'Mascota',
+                'security_answer_2' => 'Ciudad',
+                'security_answer_3' => 'Amigo',
+                'plain_password_encrypted' => Crypt::encryptString('password'),
+            ]
+        );
 
         /*
         // Generamos datos maestros para el funcionamiento del autolavado
