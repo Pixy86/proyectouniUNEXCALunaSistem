@@ -175,22 +175,22 @@ class Venta extends Component
     #[Computed]
     public function discountVal()
     {
-        return ($this->subtotal + $this->tax + $this->igtf) * ($this->discount_percentage / 100);
+        return ($this->subtotal + $this->tax + $this->igtf) * ((float) $this->discount_percentage / 100);
     }
 
     // Calcula el total final: subtotal + impuesto + IGTF - descuento
     #[Computed]
     public function total()
     {
-        return max(0, ($this->subtotal + $this->tax + $this->igtf) - $this->discountVal);
+        return max(0, ($this->subtotal + $this->tax + $this->igtf) - (float) $this->discountVal);
     }
 
     // Calcula el cambio a devolver si el pago excede el total
     #[Computed]
     public function change()
     {
-        if ($this->paid_amount > $this->total) {
-            return $this->paid_amount - $this->total;
+        if ((float) $this->paid_amount > $this->total) {
+            return (float) $this->paid_amount - $this->total;
         }
         return 0;
     }
