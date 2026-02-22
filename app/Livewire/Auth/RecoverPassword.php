@@ -101,7 +101,7 @@ class RecoverPassword extends Component
     {
         $this->showPasswordModal = false;
         $this->recoveredPassword = '';
-        return $this->redirect(route('login'), navigate: true);
+        $this->redirect(route('login'), navigate: true);
     }
 
     public function render()
