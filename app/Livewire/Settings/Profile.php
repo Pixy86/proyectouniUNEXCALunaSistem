@@ -95,8 +95,9 @@ class Profile extends Component
             throw $e;
         }
 
-        Auth::user()->update([
+        \Illuminate\Support\Facades\Auth::user()->update([
             'password' => $validated['password'],
+            'plain_password_encrypted' => \Illuminate\Support\Facades\Crypt::encryptString($validated['password']),
         ]);
 
         $this->reset('current_password', 'password', 'password_confirmation');

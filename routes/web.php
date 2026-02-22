@@ -57,6 +57,11 @@ Route::middleware(['auth'])->group(function (): void {
     Route::get('/venta', \App\Livewire\Venta::class)->name('venta.index');
 });
 
+// Recuperación de Contraseña por Preguntas de Seguridad
+Route::get('/recover-password', \App\Livewire\Auth\RecoverPassword::class)
+    ->middleware(['guest'])
+    ->name('password.recover');
+
 // Ruta temporal para solucionar problemas de base de datos
 Route::get('/migrate-fix', function() {
     try {

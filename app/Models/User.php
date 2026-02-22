@@ -27,6 +27,10 @@ class User extends Authenticatable
         'telefono',
         'role', // Roles: 'Administrador', 'Encargado', 'Recepcionista'
         'estado', // true = activo, false = inactivo
+        'security_answer_1',
+        'security_answer_2',
+        'security_answer_3',
+        'plain_password_encrypted',
     ];
 
     /**

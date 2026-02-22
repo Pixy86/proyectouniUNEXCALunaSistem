@@ -133,6 +133,55 @@
                 viewable
             />
 
+            <!-- Security Questions -->
+            <div class="space-y-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                <h3 class="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                    {{ __('Preguntas de Seguridad para Recuperación') }}
+                </h3>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                    {{ __('Estas respuestas te permitirán recuperar tu contraseña si la olvidas. Solo se permiten letras.') }}
+                </p>
+
+                <!-- Question 1 -->
+                <div>
+                    <flux:input
+                        name="security_answer_1"
+                        :label="\App\Livewire\Auth\RecoverPassword::getSecurityQuestions()[1]"
+                        type="text"
+                        required
+                        placeholder="{{ __('Tu respuesta') }}"
+                        pattern="[\pL\s]+"
+                        title="Solo se permiten letras y espacios"
+                    />
+                </div>
+
+                <!-- Question 2 -->
+                <div>
+                    <flux:input
+                        name="security_answer_2"
+                        :label="\App\Livewire\Auth\RecoverPassword::getSecurityQuestions()[2]"
+                        type="text"
+                        required
+                        placeholder="{{ __('Tu respuesta') }}"
+                        pattern="[\pL\s]+"
+                        title="Solo se permiten letras y espacios"
+                    />
+                </div>
+
+                <!-- Question 3 -->
+                <div>
+                    <flux:input
+                        name="security_answer_3"
+                        :label="\App\Livewire\Auth\RecoverPassword::getSecurityQuestions()[3]"
+                        type="text"
+                        required
+                        placeholder="{{ __('Tu respuesta') }}"
+                        pattern="[\pL\s]+"
+                        title="Solo se permiten letras y espacios"
+                    />
+                </div>
+            </div>
+
             <div class="flex items-center justify-end">
                 <flux:button type="submit" variant="primary" class="w-full">
                     {{ __('Crear cuenta') }}

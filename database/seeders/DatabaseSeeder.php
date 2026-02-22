@@ -8,6 +8,8 @@ use App\Models\Customer;
 use App\Models\Vehicle;
 use Illuminate\Database\Seeder;
 
+use Illuminate\Support\Facades\Crypt;
+
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -22,6 +24,10 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('admin123'),
             'role' => 'Administrador',
             'estado' => true,
+            'security_answer_1' => 'Mascota',
+            'security_answer_2' => 'Ciudad',
+            'security_answer_3' => 'Amigo',
+            'plain_password_encrypted' => Crypt::encryptString('admin123'),
         ]);
 
         User::factory()->create([
@@ -30,6 +36,10 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('admin123'),
             'role' => 'Administrador',
             'estado' => true,
+            'security_answer_1' => 'Mascota',
+            'security_answer_2' => 'Ciudad',
+            'security_answer_3' => 'Amigo',
+            'plain_password_encrypted' => Crypt::encryptString('admin123'),
         ]);
 
         // Perfiles de prueba para diferentes departamentos
@@ -39,6 +49,10 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'),
             'role' => 'Encargado',
             'estado' => true,
+            'security_answer_1' => 'Mascota',
+            'security_answer_2' => 'Ciudad',
+            'security_answer_3' => 'Amigo',
+            'plain_password_encrypted' => Crypt::encryptString('password'),
         ]);
 
         User::factory()->create([
@@ -47,6 +61,10 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'),
             'role' => 'Recepcionista',
             'estado' => true,
+            'security_answer_1' => 'Mascota',
+            'security_answer_2' => 'Ciudad',
+            'security_answer_3' => 'Amigo',
+            'plain_password_encrypted' => Crypt::encryptString('password'),
         ]);
 
         /*
