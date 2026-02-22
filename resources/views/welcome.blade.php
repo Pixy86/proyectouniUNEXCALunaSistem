@@ -16,7 +16,7 @@
     </head>
     <body class="antialiased h-screen flex overflow-hidden font-sans">
         <!-- Left Side: Logo Area -->
-        <div class="hidden md:flex w-1/2 bg-cover bg-center items-center justify-center relative overflow-hidden" style="background-image: url('{{ asset('auth-bg.webp') }}');">
+        <div class="hidden md:flex w-1/2 bg-cover bg-center items-center justify-center relative overflow-hidden" style="background-image: url('{{ asset('auth-bg-new.jpg') }}');">
              <!-- Overlay -->
             <div class="absolute inset-0 bg-black/60 pointer-events-none"></div>
             
