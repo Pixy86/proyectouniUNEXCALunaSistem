@@ -13,36 +13,36 @@ return new class extends Migration
     {
         // Aseguramos que las columnas de inventario sean positivas
         Schema::table('inventories', function (Blueprint $table) {
-            $table->unsignedInteger('stockActual')->default(0)->change();
+            $table->integer('stockActual')->unsigned()->default(0)->change();
         });
 
         // Aseguramos que los precios de servicios sean positivos
         Schema::table('services', function (Blueprint $table) {
-            $table->unsignedDecimal('precio', 10, 2)->change();
+            $table->decimal('precio', 10, 2)->unsigned()->change();
         });
 
         // Aseguramos que los montos de ventas sean positivos
         Schema::table('sales', function (Blueprint $table) {
-            $table->unsignedDecimal('total', 10, 2)->change();
-            $table->unsignedDecimal('paid_amount', 10, 2)->change();
-            $table->unsignedDecimal('discount', 10, 2)->default(0)->change();
+            $table->decimal('total', 10, 2)->unsigned()->change();
+            $table->decimal('paid_amount', 10, 2)->unsigned()->change();
+            $table->decimal('discount', 10, 2)->unsigned()->default(0)->change();
         });
 
         // Aseguramos que las cantidades y precios en items de órdenes sean positivos
         Schema::table('service_order_items', function (Blueprint $table) {
-            $table->unsignedInteger('quantity')->default(1)->change();
-            $table->unsignedDecimal('price', 10, 2)->change();
+            $table->integer('quantity')->unsigned()->default(1)->change();
+            $table->decimal('price', 10, 2)->unsigned()->change();
         });
 
         // Aseguramos que las cantidades y precios en items de ventas sean positivos
         Schema::table('sales_items', function (Blueprint $table) {
-            $table->unsignedInteger('quantity')->default(1)->change();
-            $table->unsignedDecimal('price', 10, 2)->change();
+            $table->integer('quantity')->unsigned()->default(1)->change();
+            $table->decimal('price', 10, 2)->unsigned()->change();
         });
 
         // Aseguramos que las cantidades en la relación servicio-inventario sean positivas
         Schema::table('inventory_service', function (Blueprint $table) {
-            $table->unsignedInteger('quantity')->default(1)->change();
+            $table->integer('quantity')->unsigned()->default(1)->change();
         });
     }
 
