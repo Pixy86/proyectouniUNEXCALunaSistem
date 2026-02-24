@@ -157,7 +157,7 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <flux:input wire:model.live="discount_percentage" type="number" min="0" max="100" label="Descuento (%)" placeholder="0%" onfocus="if(this.value=='0'){this.value=''}" />
-                    <flux:input wire:model.live="paid_amount" type="number" step="0.01" label="Monto Pagado" placeholder="0.00" onfocus="if(this.value=='0'){this.value=''}" />
+                    <flux:input wire:model.live="paid_amount" type="number" min="0" step="0.01" label="Monto Pagado" placeholder="0.00" onfocus="if(this.value=='0'){this.value=''}" />
                 </div>
 
             <div class="pt-4 border-t border-zinc-200 dark:border-zinc-700 space-y-2">

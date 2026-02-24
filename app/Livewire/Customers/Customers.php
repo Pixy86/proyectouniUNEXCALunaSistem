@@ -82,15 +82,18 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                             ->label('Cédula / RIF')
                                             ->required()
                                             ->numeric()
+                                            ->live()
                                             ->unique('customers', 'cedula_rif'),
                                         TextInput::make('nombre')
                                             ->required()
+                                            ->live()
                                             ->regex('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u')
                                             ->validationMessages([
                                                 'regex' => 'El nombre solo debe contener letras.',
                                             ]),
                                         TextInput::make('apellido')
                                             ->required()
+                                            ->live()
                                             ->regex('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u')
                                             ->validationMessages([
                                                 'regex' => 'El apellido solo debe contener letras.',
@@ -102,14 +105,15 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                             ->inline(false),
                                     ]),
                             ]),
-                        \Filament\Schemas\Components\Section::make('Contacto y Dirección')
+                        Section::make('Contacto y Dirección')
                             ->schema([
-                                \Filament\Schemas\Components\Grid::make(2)
+                                Grid::make(2)
                                     ->schema([
                                         TextInput::make('telefono')
                                             ->label('Teléfono Principal')
                                             ->tel()
                                             ->required()
+                                            ->live()
                                             ->regex('/^[0-9]+$/')
                                             ->validationMessages([
                                                 'regex' => 'El teléfono solo debe contener números.',
@@ -117,16 +121,19 @@ class Customers extends Component implements HasActions, HasSchemas, HasTable
                                         TextInput::make('telefono_secundario')
                                             ->label('Teléfono Secundario')
                                             ->tel()
+                                            ->live()
                                             ->regex('/^[0-9]+$/')
                                             ->validationMessages([
                                                 'regex' => 'El teléfono solo debe contener números.',
                                             ]),
                                         TextInput::make('email')
                                             ->email()
+                                            ->live()
                                             ->placeholder('correo@ejemplo.com'),
                                     ]),
                                 Textarea::make('direccion')
                                     ->label('Dirección de Habitación')
+                                    ->live()
                                     ->rows(3),
                             ]),
                     ])

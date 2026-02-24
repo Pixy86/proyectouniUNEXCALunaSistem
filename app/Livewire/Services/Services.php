@@ -45,6 +45,7 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                             TextInput::make('nombre')
                                 ->required()
                                 ->maxLength(255)
+                                ->live()
                                 ->unique('services', 'nombre', ignoreRecord: true)
                                 ->validationMessages([
                                     'unique' => 'Ya existe un servicio con este nombre.',
@@ -52,10 +53,11 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                             TextInput::make('precio')
                                 ->numeric()
                                 ->prefix('$')
-                                ->minValue(0.01)
+                                ->minValue(0)
+                                ->live()
                                 ->required()
                                 ->validationMessages([
-                                    'min' => 'Los valores numéricos deben ser positivos.',
+                                    'min' => 'El precio no puede ser negativo.',
                                 ]),
                             Toggle::make('estado')
                                 ->label('Activo')
@@ -64,6 +66,7 @@ class Services extends Component implements HasActions, HasSchemas, HasTable
                         ]),
                     Textarea::make('descripcion')
                         ->label('Descripción del Servicio')
+                        ->live()
                         ->rows(3),
                 ]),
             \Filament\Schemas\Components\Section::make('Productos del Inventario')

@@ -94,11 +94,12 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
                                         TextInput::make('stockActual')
                                             ->label('Stock Inicial')
                                             ->numeric()
-                                            ->default(1)
-                                            ->minValue(1)
+                                            ->default(0)
+                                            ->minValue(0)
+                                            ->live()
                                             ->required()
                                             ->validationMessages([
-                                                'min' => 'El stock debe ser al menos 1.',
+                                                'min' => 'El stock no puede ser negativo.',
                                             ]),
                                         Toggle::make('estado')
                                             ->label('Activo')
@@ -173,10 +174,11 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
                                         TextInput::make('stockActual')
                                             ->label('Stock Actual')
                                             ->numeric()
-                                            ->minValue(1)
+                                            ->minValue(0)
+                                            ->live()
                                             ->required()
                                             ->validationMessages([
-                                                'min' => 'El stock debe ser al menos 1.',
+                                                'min' => 'El stock no puede ser negativo.',
                                             ]),
                                         Toggle::make('estado')
                                             ->label('Activo')

@@ -74,6 +74,75 @@ class ListUser extends Component implements HasActions, HasSchemas, HasTable
             ->filters([
                 //
             ])
+            ->headerActions([
+                Action::make('create')
+                    ->label('Nuevo Usuario')
+                    ->icon('heroicon-m-plus')
+                    ->color('primary')
+                    ->visible(fn () => auth()->user()?->role === 'Administrador')
+                    ->form([
+                        \Filament\Schemas\Components\Section::make('Información del Nuevo Usuario')
+                            ->schema([
+                                TextInput::make('name')
+                                    ->label('Nombre Completo')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->regex('/^[\pL\s\-\']+$/u')
+                                    ->validationMessages([
+                                        'regex' => 'El nombre solo debe contener letras.',
+                                    ]),
+                                TextInput::make('email')
+                                    ->label('Correo Electrónico')
+                                    ->email()
+                                    ->required()
+                                    ->unique('users', 'email'),
+                                TextInput::make('telefono')
+                                    ->label('Teléfono')
+                                    ->tel()
+                                    ->regex('/^[0-9]+$/')
+                                    ->validationMessages([
+                                        'regex' => 'El teléfono solo debe contener números.',
+                                    ]),
+                                Select::make('role')
+                                    ->label('Cargo / Rol')
+                                    ->options([
+                                        'Administrador' => 'Administrador',
+                                        'Encargado' => 'Encargado',
+                                        'Recepcionista' => 'Recepcionista',
+                                    ])
+                                    ->required(),
+                                TextInput::make('password')
+                                    ->label('Contraseña')
+                                    ->password()
+                                    ->required()
+                                    ->minLength(8),
+                            ]),
+                    ])
+                    ->action(function (array $data) {
+                        $user = User::create([
+                            'name' => $data['name'],
+                            'email' => $data['email'],
+                            'telefono' => $data['telefono'] ?? null,
+                            'role' => $data['role'],
+                            'password' => $data['password'], // Laravel hashes automatically if using casts or hooks
+                            'estado' => true,
+                        ]);
+
+                        \App\Models\AuditLog::registrar(
+                            accion: \App\Models\AuditLog::ACCION_CREATE,
+                            descripcion: "Nuevo usuario creado: {$user->name} (Rol: {$user->role})",
+                            modelo: 'User',
+                            modeloId: $user->id
+                        );
+
+                        Notification::make()
+                            ->title('Usuario Creado')
+                            ->success()
+                            ->send();
+                    })
+                    ->modalWidth('2xl')
+                    ->closeModalByClickingAway(false),
+            ])
             ->actions([
                 // Acción de edición completa en modal (Básico: Nombre, Email, Password)
                 EditAction::make()
@@ -86,13 +155,27 @@ class ListUser extends Component implements HasActions, HasSchemas, HasTable
                         \Filament\Schemas\Components\Section::make('Información Personal')
                             ->schema([
                                 TextInput::make('name')
+                                    ->label('Nombre Completo')
                                     ->required()
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->regex('/^[\pL\s\-\']+$/u')
+                                    ->validationMessages([
+                                        'regex' => 'El nombre solo debe contener letras.',
+                                    ]),
                                 TextInput::make('email')
+                                    ->label('Correo Electrónico')
                                     ->email()
                                     ->required()
                                     ->unique('users', 'email', ignoreRecord: true),
+                                TextInput::make('telefono')
+                                    ->label('Teléfono')
+                                    ->tel()
+                                    ->regex('/^[0-9]+$/')
+                                    ->validationMessages([
+                                        'regex' => 'El teléfono solo debe contener números.',
+                                    ]),
                                 Select::make('role')
+                                    ->label('Cargo / Rol')
                                     ->options([
                                         'Administrador' => 'Administrador',
                                         'Encargado' => 'Encargado',
@@ -101,6 +184,7 @@ class ListUser extends Component implements HasActions, HasSchemas, HasTable
                                     ->required(),
                             ]),
                     ])
+                    ->closeModalByClickingAway(false)
                     ->after(function (User $record) {
                         // Nota: El after recibe el record YA actualizado. 
                         // Sin embargo, para obtener el cambio detallado, 

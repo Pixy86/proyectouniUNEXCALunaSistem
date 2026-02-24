@@ -36,6 +36,17 @@
                 placeholder="correo@ejemplo.com"
             />
 
+            <!-- Phone Number -->
+            <flux:input
+                name="telefono"
+                :label="__('Teléfono')"
+                type="tel"
+                required
+                placeholder="04121234567"
+                pattern="[0-9]+"
+                title="Solo se permiten números"
+            />
+
             <!-- Password -->
             <div>
                 <flux:input
