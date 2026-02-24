@@ -261,9 +261,11 @@ class Venta extends Component
                 // Verificación de stock antes de procesar
                 foreach ($this->cart as $item) {
                     $service = Service::with('inventories')->find($item['id']);
-                    if (!$service) {
-                        throw new \Exception("El servicio '{$item['name']}' no existe.");
+                    // Verificar que el servicio esté activo y tenga stock
+                    if (!$service->estado || $service->cantidad === 0) {
+                        throw new \Exception("El servicio '{$item['name']}' ya no está disponible o está inactivo.");
                     }
+
                     // Verificar stock de cada producto asociado al servicio
                     foreach ($service->inventories as $inventory) {
                         $requiredQty = $inventory->pivot->quantity * $item['quantity'];

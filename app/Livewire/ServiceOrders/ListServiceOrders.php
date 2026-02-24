@@ -404,11 +404,11 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
             $service = Service::with('inventories')->find($item['service_id']);
             if (!$service) continue;
 
-            // Primero verificamos la capacidad general del servicio (0 significa agotado, -1 es mano de obra)
-            if ($service->cantidad === 0) {
+            // Primero verificamos que el servicio esté activo y tenga capacidad general
+            if (!$service->estado || $service->cantidad === 0) {
                 Notification::make()
-                    ->title('Stock Insuficiente')
-                    ->body("No hay stock disponible para el servicio: {$service->nombre}")
+                    ->title('Servicio No Disponible')
+                    ->body("El servicio '{$service->nombre}' está inactivo o no tiene stock.")
                     ->danger()
                     ->send();
                 return false;
