@@ -20,6 +20,7 @@
                     :placeholder="__('Nombre completo')"
                     pattern="[\pL\s\-']+"
                     title="Solo se permiten letras, espacios, guiones y apóstrofos"
+                    :value="old('name')"
                 />
                 <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
                     Solo letras. No se permiten números ni caracteres especiales.
@@ -34,18 +35,10 @@
                 required
                 autocomplete="email"
                 placeholder="correo@ejemplo.com"
+                :value="old('email')"
             />
 
-            <!-- Phone Number -->
-            <flux:input
-                name="telefono"
-                :label="__('Teléfono')"
-                type="tel"
-                required
-                placeholder="04121234567"
-                pattern="[0-9]+"
-                title="Solo se permiten números"
-            />
+            {{-- Phone Number Removed --}}
 
             <!-- Password -->
             <div>
@@ -163,6 +156,7 @@
                         placeholder="{{ __('Tu respuesta') }}"
                         pattern="[\pL\s]+"
                         title="Solo se permiten letras y espacios"
+                        :value="old('security_answer_1')"
                     />
                 </div>
 
@@ -176,6 +170,7 @@
                         placeholder="{{ __('Tu respuesta') }}"
                         pattern="[\pL\s]+"
                         title="Solo se permiten letras y espacios"
+                        :value="old('security_answer_2')"
                     />
                 </div>
 
@@ -189,6 +184,7 @@
                         placeholder="{{ __('Tu respuesta') }}"
                         pattern="[\pL\s]+"
                         title="Solo se permiten letras y espacios"
+                        :value="old('security_answer_3')"
                     />
                 </div>
             </div>
