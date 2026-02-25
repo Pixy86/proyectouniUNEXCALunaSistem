@@ -32,7 +32,7 @@ class Venta extends Component
     public $customer_id = null;
     public $vehicle_id = null;
     public $order_id = null; // Associated order ID
-    public $payment_method_id = '';
+    public $payment_method_id = null;
     public $paid_amount = 0; // Amount paid by customer
     public $discount_percentage = 0; // Discount as percentage
 
@@ -142,7 +142,6 @@ class Venta extends Component
         unset($this->cart[$cartKey]);
         if (empty($this->cart)) {
             $this->reset(['customer_id', 'vehicle_id', 'order_id', 'customerVehicles', 'paid_amount', 'discount_percentage', 'payment_method_id']);
-            $this->payment_method_id = '';
         }
     }
 
@@ -327,7 +326,6 @@ class Venta extends Component
             $saleTotal = $transactionResult->total;
 
             $this->reset(['cart', 'customer_id', 'payment_method_id', 'search', 'paid_amount', 'discount_percentage', 'vehicle_id', 'order_id', 'customerVehicles']);
-            $this->payment_method_id = '';
             $this->loadData(); // Recarga para actualizar lista basada en nuevo stock y estado de órdenes
             
             // Log Auditoría
