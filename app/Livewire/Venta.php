@@ -220,7 +220,10 @@ class Venta extends Component
 
         $order = ServiceOrder::find($orderId);
         if ($order && $order->status === ServiceOrder::STATUS_ABIERTA) {
-            $order->update(['status' => ServiceOrder::STATUS_EN_PROCESO]);
+            $order->update([
+                'status' => ServiceOrder::STATUS_EN_PROCESO,
+                'started_at' => $order->started_at ?? now(),
+            ]);
             $this->loadData(); // Recargar datos para reflejar el cambio
             
             Notification::make()
@@ -238,7 +241,7 @@ class Venta extends Component
         $this->validate([
             'customer_id'          => 'required|exists:customers,id',
             'vehicle_id'           => 'nullable|exists:vehicles,id',
-            'payment_method_id'    => 'required|exists:payment_methods,id',
+            'payment_method_id'    => 'required|exists:payment_methods,id,estado,1',
             'cart'                 => 'required|array|min:1',
             'paid_amount'          => ['required', 'numeric', 'min:0', function ($attribute, $value, $fail) use ($total) {
                 if ((float) $value < (float) $total) {
@@ -300,14 +303,8 @@ class Venta extends Component
                         $orderIds[] = $item['order_id'];
                     }
 
-                    // Decrementar inventario de todos los productos del servicio
-                    $service = Service::with('inventories')->find($item['id']);
-                    if ($service) {
-                        foreach ($service->inventories as $inventory) {
-                            $decrementQty = $inventory->pivot->quantity * $item['quantity'];
-                            $inventory->decrement('stockActual', $decrementQty);
-                        }
-                    }
+                    // El inventario ya fue decrementado al crear la orden (Reserva)
+                    // No se decrementa de nuevo aquí para evitar duplicidad.
                 }
 
                 // Finalizar las órdenes de servicio involucradas

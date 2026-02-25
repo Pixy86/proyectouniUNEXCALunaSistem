@@ -18,10 +18,12 @@ class ServiceOrder extends Model
         'status',
         'notes',
         'completed_at',
+        'started_at',
     ];
 
     protected $casts = [
         'completed_at' => 'datetime',
+        'started_at' => 'datetime',
     ];
 
     // Constantes que definen los posibles estados de una orden de servicio

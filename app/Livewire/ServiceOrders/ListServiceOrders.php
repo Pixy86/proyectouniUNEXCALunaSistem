@@ -49,7 +49,7 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                 TextColumn::make('customer.nombre')
                     ->label('Cliente')
                     ->formatStateUsing(fn (ServiceOrder $record): string => "{$record->customer->nombre} {$record->customer->apellido}")
-                    ->searchable(['nombre', 'apellido'])
+                    ->searchable(['nombre', 'apellido', 'cedula_rif'])
                     ->sortable(),
                 TextColumn::make('vehicle.placa')
                     ->label('Vehículo')
@@ -101,6 +101,17 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                     ->modalSubmitActionLabel('Guardar Orden')
                     ->modalCancelActionLabel('Cancelar')
                     ->action(function (array $data) {
+                        // Validar que el vehículo pertenezca al cliente (Integridad CU-09.1.1)
+                        $vehicle = \App\Models\Vehicle::find($data['vehicle_id']);
+                        if ($vehicle && $vehicle->customer_id != $data['customer_id']) {
+                            Notification::make()
+                                ->title('Error de Integridad')
+                                ->body('El vehículo seleccionado no pertenece al cliente.')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
                         // Validar stock antes de crear nada
                         if (!$this->validateInventoryStock($data['items'])) {
                             return;
@@ -115,18 +126,26 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                         ]);
 
                         foreach ($data['items'] as $item) {
-                            $service = Service::find($item['service_id']);
-                            ServiceOrderItem::create([
-                                'service_order_id' => $order->id,
-                                'service_id' => $item['service_id'],
-                                'quantity' => $item['quantity'] ?? 1,
-                                'price' => $service->precio,
-                            ]);
+                            $service = Service::with('inventories')->find($item['service_id']);
+                            if ($service) {
+                                ServiceOrderItem::create([
+                                    'service_order_id' => $order->id,
+                                    'service_id' => $item['service_id'],
+                                    'quantity' => $item['quantity'] ?? 1,
+                                    'price' => $service->precio,
+                                ]);
+
+                                // Decrementar inventario inmediatamente (Reserva)
+                                foreach ($service->inventories as $inventory) {
+                                    $decrementQty = $inventory->pivot->quantity * ($item['quantity'] ?? 1);
+                                    $inventory->decrement('stockActual', $decrementQty);
+                                }
+                            }
                         }
 
                         \App\Models\AuditLog::registrar(
                             accion: \App\Models\AuditLog::ACCION_CREATE,
-                            descripcion: "Orden de servicio #{$order->id} creada para el cliente {$order->customer->nombre} {$order->customer->apellido}",
+                            descripcion: "Orden de servicio #{$order->id} creada para el cliente {$order->customer->nombre} {$order->customer->apellido} (Stock reservado)",
                             modelo: 'ServiceOrder',
                             modeloId: $order->id
                         );
@@ -209,10 +228,11 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                         $record->update([
                             'status' => $data['status'],
                             'completed_at' => $data['status'] === ServiceOrder::STATUS_TERMINADO ? now() : null,
+                            'started_at' => ($data['status'] === ServiceOrder::STATUS_EN_PROCESO && !$record->started_at) ? now() : $record->started_at,
                         ]);
                         \App\Models\AuditLog::registrar(
                             accion: \App\Models\AuditLog::ACCION_UPDATE,
-                            descripcion: "Estado de orden #{$record->id} actualizado a: {$data['status']}",
+                            descripcion: "Estado de orden #{$record->id} actualizado a: {$data['status']}" . ($data['status'] === ServiceOrder::STATUS_EN_PROCESO ? " (Iniciada)" : ""),
                             modelo: 'ServiceOrder',
                             modeloId: $record->id,
                             datosAnteriores: $oldData,
@@ -243,6 +263,17 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                         ])->toArray(),
                     ])
                     ->action(function (ServiceOrder $record, array $data) {
+                        // Validar que el vehículo pertenezca al cliente (Integridad CU-09.1.1)
+                        $vehicle = \App\Models\Vehicle::find($data['vehicle_id']);
+                        if ($vehicle && $vehicle->customer_id != $data['customer_id']) {
+                            Notification::make()
+                                ->title('Error de Integridad')
+                                ->body('El vehículo seleccionado no pertenece al cliente.')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
                         // Validar stock antes de actualizar
                         if (!$this->validateInventoryStock($data['items'])) {
                             return;
@@ -255,16 +286,35 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                             'notes' => $data['notes'] ?? null,
                         ]);
 
-                        // Replace items
+                        // Revertir stock antiguo antes de actualizar
+                        foreach ($record->items as $item) {
+                            $service = $item->service;
+                            if ($service) {
+                                foreach ($service->inventories as $inventory) {
+                                    $revertQty = $inventory->pivot->quantity * $item->quantity;
+                                    $inventory->increment('stockActual', $revertQty);
+                                }
+                            }
+                        }
+
+                        // Reemplazar items y quitar nuevo stock
                         $record->items()->delete();
                         foreach ($data['items'] as $item) {
-                            $service = Service::find($item['service_id']);
-                            ServiceOrderItem::create([
-                                'service_order_id' => $record->id,
-                                'service_id' => $item['service_id'],
-                                'quantity' => $item['quantity'] ?? 1,
-                                'price' => $service->precio,
-                            ]);
+                            $service = Service::with('inventories')->find($item['service_id']);
+                            if ($service) {
+                                ServiceOrderItem::create([
+                                    'service_order_id' => $record->id,
+                                    'service_id' => $item['service_id'],
+                                    'quantity' => $item['quantity'] ?? 1,
+                                    'price' => $service->precio,
+                                ]);
+
+                                // Decrementar nuevo stock
+                                foreach ($service->inventories as $inventory) {
+                                    $decrementQty = $inventory->pivot->quantity * ($item['quantity'] ?? 1);
+                                    $inventory->decrement('stockActual', $decrementQty);
+                                }
+                            }
                         }
 
                         \App\Models\AuditLog::registrar(
@@ -292,8 +342,17 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                     ->requiresConfirmation()
                     ->modalHeading('Cancelar Orden')
                     ->modalDescription('¿Estás seguro de que deseas cancelar esta orden? Esta acción no se puede deshacer.')
-                    ->action(function (ServiceOrder $record) {
-                        $record->update(['status' => ServiceOrder::STATUS_CANCELADA]);
+                    ->form([
+                        Textarea::make('cancel_reason')
+                            ->label('Motivo de Cancelación')
+                            ->placeholder('Ingrese el motivo por el cual se cancela la orden...')
+                            ->required(),
+                    ])
+                    ->action(function (ServiceOrder $record, array $data) {
+                        $record->update([
+                            'status' => ServiceOrder::STATUS_CANCELADA,
+                            'notes' => $record->notes . "\n\nMOTIVO CANCELACIÓN: " . $data['cancel_reason'],
+                        ]);
 
                         // Revertir stock de inventario por cada servicio en la orden
                         foreach ($record->items as $item) {
@@ -432,7 +491,7 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
             if ($req['required'] > $req['available']) {
                 \Filament\Notifications\Notification::make()
                     ->title('Error de Stock')
-                    ->body("stock insuficiente para el producto ({$req['name']})")
+                    ->body("Stock insuficiente para el producto ({$req['name']})")
                     ->danger()
                     ->send();
                 return false;

@@ -31,7 +31,7 @@ class ListSales extends Component implements HasActions, HasSchemas, HasTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn (): Builder => Sale::query())
+            ->query(fn (): Builder => Sale::query()->with(['customer', 'user', 'paymentMethod', 'serviceOrder']))
             ->columns([
                 \Filament\Tables\Columns\TextColumn::make('customer.nombre')
                     ->label('Cliente')
@@ -41,10 +41,12 @@ class ListSales extends Component implements HasActions, HasSchemas, HasTable
                 \Filament\Tables\Columns\TextColumn::make('user.name')
                     ->label('Vendedor')
                     ->placeholder('Sistema')
+                    ->searchable()
                     ->sortable(),
                 \Filament\Tables\Columns\TextColumn::make('service_order_id')
-                    ->label('Orden de Servicio')
+                    ->label('Orden #')
                     ->placeholder('Venta Directa')
+                    ->searchable()
                     ->sortable(),
                 \Filament\Tables\Columns\TextColumn::make('paymentMethod.nombre')
                     ->label('Método de Pago')
@@ -55,7 +57,7 @@ class ListSales extends Component implements HasActions, HasSchemas, HasTable
                     ->sortable(),
                 \Filament\Tables\Columns\TextColumn::make('created_at')
                     ->label('Fecha')
-                    ->dateTime()
+                    ->dateTime('d/m/Y h:i A')
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')

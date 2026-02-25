@@ -77,6 +77,7 @@ class ListPaymentMethods extends Component implements HasActions, HasSchemas, Ha
                                             ->regex('/^[\pL\s]+$/u')
                                             ->validationMessages([
                                                 'regex' => 'El nombre del método solo debe contener letras.',
+                                                'required' => 'El nombre del método de pago es obligatorio.',
                                             ]),
                                         Toggle::make('estado')
                                             ->label('Activo')
@@ -145,6 +146,7 @@ class ListPaymentMethods extends Component implements HasActions, HasSchemas, Ha
                                             ->regex('/^[\pL\s]+$/u')
                                             ->validationMessages([
                                                 'regex' => 'El nombre del método solo debe contener letras.',
+                                                'required' => 'El nombre del método de pago es obligatorio.',
                                             ]),
                                         Toggle::make('estado')
                                             ->onColor('success'),
@@ -178,6 +180,7 @@ class ListPaymentMethods extends Component implements HasActions, HasSchemas, Ha
                     ->size('lg')
                     ->visible(fn () => auth()->user()?->role === 'Administrador')
                     ->iconButton()
+                    ->requiresConfirmation()
                     ->action(function (PaymentMethod $record) {
                         if ($record->hasLinkedRecords()) {
                             Notification::make()

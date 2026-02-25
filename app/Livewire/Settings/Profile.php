@@ -85,8 +85,8 @@ class Profile extends Component
                 'current_password' => ['required', 'string', 'current_password'],
                 'password' => ['required', 'string', PasswordRule::defaults(), 'confirmed'],
             ], [
-                'current_password.current_password' => 'La contraseña actual es incorrecta.',
-                'password.confirmed'                => 'Las contraseñas no coinciden.',
+                'current_password.current_password' => 'La contraseña es incorrecta.',
+                'password.confirmed'                => 'La confirmación de la contraseña no coincide.',
                 'password.min'                      => 'La contraseña debe tener al menos 8 caracteres.',
             ]);
         } catch (ValidationException $e) {
