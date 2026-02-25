@@ -29,7 +29,7 @@
         <div class="w-full md:w-1/2 bg-[#FDFDFC] dark:bg-[#0a0a0a] flex flex-col items-center justify-center p-8 relative">
             <!-- Mobile Logo (visible only on small screens) -->
             <div class="md:hidden mb-8">
-                <img src="{{ asset('logo-final.png') }}" alt="Logo" class="h-16 w-auto">
+                <img src="{{ asset('logo-final.png') }}" alt="Logo" class="h-16 w-auto brightness-0 dark:invert">
             </div>
 
             <div class="w-full max-w-sm space-y-8">

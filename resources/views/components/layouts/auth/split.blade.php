@@ -28,7 +28,7 @@
             <div class="w-full lg:p-8">
                 <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
                     <a href="{{ route('home') }}" class="z-20 flex flex-col items-center gap-2 font-medium lg:hidden" wire:navigate>
-                        <img src="{{ asset('logo-final.png') }}" alt="Logo" class="h-12 w-auto mb-2">
+                        <img src="{{ asset('logo-final.png') }}" alt="Logo" class="h-12 w-auto mb-2 brightness-0 dark:invert">
 
                         <span class="sr-only">{{ config('app.name', 'Laravel') }}</span>
                     </a>
