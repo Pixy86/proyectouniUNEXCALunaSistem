@@ -73,7 +73,11 @@ class ListPaymentMethods extends Component implements HasActions, HasSchemas, Ha
                                         TextInput::make('nombre')
                                             ->required()
                                             ->unique('payment_methods', 'nombre')
-                                            ->maxLength(255),
+                                            ->maxLength(255)
+                                            ->regex('/^[\pL\s]+$/u')
+                                            ->validationMessages([
+                                                'regex' => 'El nombre del método solo debe contener letras.',
+                                            ]),
                                         Toggle::make('estado')
                                             ->label('Activo')
                                             ->default(true)
@@ -137,7 +141,11 @@ class ListPaymentMethods extends Component implements HasActions, HasSchemas, Ha
                                     ->schema([
                                         TextInput::make('nombre')
                                             ->required()
-                                            ->unique('payment_methods', 'nombre', ignoreRecord: true),
+                                            ->unique('payment_methods', 'nombre', ignoreRecord: true)
+                                            ->regex('/^[\pL\s]+$/u')
+                                            ->validationMessages([
+                                                'regex' => 'El nombre del método solo debe contener letras.',
+                                            ]),
                                         Toggle::make('estado')
                                             ->onColor('success'),
                                     ]),
