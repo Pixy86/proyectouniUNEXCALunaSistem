@@ -148,7 +148,7 @@
                     </div>
                 @endif
                 
-                <flux:select wire:model.live="payment_method_id" placeholder="Método de Pago">
+                <flux:select wire:model.live="payment_method_id" placeholder="Seleccionar método de pago">
                     @foreach($paymentMethods as $method)
                         <flux:select.option value="{{ $method->id }}">{{ $method->nombre }}</flux:select.option>
                     @endforeach

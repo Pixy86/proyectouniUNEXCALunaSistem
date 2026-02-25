@@ -141,7 +141,7 @@ class Venta extends Component
     {
         unset($this->cart[$cartKey]);
         if (empty($this->cart)) {
-            $this->reset(['customer_id', 'vehicle_id', 'order_id', 'customerVehicles', 'paid_amount', 'discount_percentage']);
+            $this->reset(['customer_id', 'vehicle_id', 'order_id', 'customerVehicles', 'paid_amount', 'discount_percentage', 'payment_method_id']);
         }
     }
 
