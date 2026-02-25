@@ -32,7 +32,7 @@ class Venta extends Component
     public $customer_id = null;
     public $vehicle_id = null;
     public $order_id = null; // Associated order ID
-    public $payment_method_id = null;
+    public $payment_method_id = '';
     public $paid_amount = 0; // Amount paid by customer
     public $discount_percentage = 0; // Discount as percentage
 
