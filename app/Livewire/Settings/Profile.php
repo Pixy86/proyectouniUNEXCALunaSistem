@@ -129,4 +129,49 @@ class Profile extends Component
 
         Session::flash('status', 'verification-link-sent');
     }
+
+    /**
+     * Reset the system data (transational, services, inventory).
+     * Restricted to Administrator and Encargado.
+     */
+    public function resetSystem(): void
+    {
+        if (!in_array(Auth::user()->role, ['Administrador', 'Encargado'])) {
+            \Filament\Notifications\Notification::make()
+                ->title('Acceso denegado')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () {
+                \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+                \Illuminate\Support\Facades\DB::table('audit_logs')->truncate();
+                \Illuminate\Support\Facades\DB::table('sales_items')->truncate();
+                \Illuminate\Support\Facades\DB::table('sales')->truncate();
+                \Illuminate\Support\Facades\DB::table('service_order_items')->truncate();
+                \Illuminate\Support\Facades\DB::table('service_orders')->truncate();
+                \Illuminate\Support\Facades\DB::table('inventory_service')->truncate();
+                \Illuminate\Support\Facades\DB::table('services')->truncate();
+                \Illuminate\Support\Facades\DB::table('inventories')->truncate();
+
+                \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            });
+
+            \Filament\Notifications\Notification::make()
+                ->title('Sistema reiniciado')
+                ->body('Se han eliminado todas las ventas, órdenes, servicios e inventario. Los usuarios, clientes y vehículos se mantienen.')
+                ->success()
+                ->send();
+                
+        } catch (\Exception $e) {
+            \Filament\Notifications\Notification::make()
+                ->title('Error al reiniciar')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
 }
