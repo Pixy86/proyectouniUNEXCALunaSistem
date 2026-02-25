@@ -148,11 +148,13 @@
                     </div>
                 @endif
                 
-                <flux:select wire:model.live="payment_method_id" placeholder="Seleccionar método de pago">
+                <select wire:model.live="payment_method_id"
+                    class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition">
+                    <option value="" disabled selected>Seleccionar método de pago</option>
                     @foreach($paymentMethods as $method)
-                        <flux:select.option value="{{ $method->id }}">{{ $method->nombre }}</flux:select.option>
+                        <option value="{{ $method->id }}">{{ $method->nombre }}</option>
                     @endforeach
-                </flux:select>
+                </select>
                 @error('payment_method_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
 
                 <div class="grid grid-cols-2 gap-3">
