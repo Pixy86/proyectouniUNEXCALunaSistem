@@ -34,9 +34,7 @@ class ListPaymentMethods extends Component implements HasActions, HasSchemas, Ha
     
     public function mount(): void
     {
-        if (!in_array(auth()->user()?->role, ['Administrador', 'Encargado'])) {
-            abort(403, 'No tiene permisos para acceder a este módulo.');
-        }
+        // Role check handled by middleware
     }
 
     public function table(Table $table): Table

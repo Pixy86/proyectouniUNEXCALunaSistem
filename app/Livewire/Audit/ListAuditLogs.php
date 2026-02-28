@@ -26,10 +26,7 @@ class ListAuditLogs extends Component implements HasActions, HasSchemas, HasTabl
 
     public function mount(): void
     {
-        // Solo administradores pueden acceder a esta página
-        if (auth()->user()?->role !== 'Administrador') {
-            abort(403, 'Acceso no autorizado');
-        }
+        // Role check handled by middleware
     }
 
     public function table(Table $table): Table

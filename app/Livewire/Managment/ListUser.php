@@ -32,9 +32,7 @@ class ListUser extends Component implements HasActions, HasSchemas, HasTable
     
     public function mount(): void
     {
-        if (auth()->user()?->role !== 'Administrador') {
-            abort(403, 'No tiene permisos para acceder a este módulo.');
-        }
+        // Role check handled by middleware
     }
 
     public function table(Table $table): Table
@@ -185,18 +183,18 @@ class ListUser extends Component implements HasActions, HasSchemas, HasTable
                             ]),
                     ])
                     ->closeModalByClickingAway(false)
-                    ->after(function (User $record) {
-                        // Nota: El after recibe el record YA actualizado. 
-                        // Sin embargo, para obtener el cambio detallado, 
-                        // idealmente guardaríamos el estado anterior antes.
-                        // Como Filament maneja la actualización, usaremos getsChanges() si es posible o simplemente registraremos el nuevo estado.
+                    ->before(function (User $record) use (&$oldUserData) {
+                        $oldUserData = $record->toArray();
+                    })
+                    ->after(function (User $record) use (&$oldUserData) {
+                        $newData = $record->fresh()->toArray();
                         \App\Models\AuditLog::registrar(
                             accion: \App\Models\AuditLog::ACCION_UPDATE,
-                            descripcion: "Usuario '{$record->name}' actualizado (Rol: {$record->role})",
+                            descripcion: "Usuario '{$record->name}' actualizado",
                             modelo: 'User',
                             modeloId: $record->id,
-                            datosAnteriores: $record->getOriginal(), // getOriginal tiene los datos antes del save en un Eloquent hook
-                            datosNuevos: $record->toArray()
+                            datosAnteriores: $oldUserData ?? [],
+                            datosNuevos: $newData
                         );
                         Notification::make()
                             ->title('Usuario Actualizado')

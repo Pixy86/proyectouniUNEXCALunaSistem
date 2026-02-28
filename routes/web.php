@@ -18,16 +18,16 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/dashboard', \App\Livewire\Dashboard::class)
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'access'])
     ->name('dashboard');
 
 // Configuración y Perfil de Usuario
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'access'])->group(function () {
     Route::get('settings', Profile::class)->name('profile.edit');
 });
 
 // Gestión Principal del Sistema
-Route::middleware(['auth'])->group(function (): void {
+Route::middleware(['auth', 'access'])->group(function (): void {
     // Ventas y Facturación
     Route::get('/manage-sales', ListSales::class)->name('sales.index');
     Route::get('/sales/report/pdf', [App\Http\Controllers\ReportController::class, 'generateSalesReport'])->name('sales.report.pdf');
@@ -41,20 +41,25 @@ Route::middleware(['auth'])->group(function (): void {
     // Control de Inventarios
     Route::get('/manage-inventories', ListInventories::class)->name('inventories.index');
 
-    // Administración de Usuarios (Solo Admin)
-    Route::get('/manage-users', ListUser::class)->name('users.index');
-
-    // Configuración de Métodos de Pago (Solo Admin)
-    Route::get('/manage-payment-methods', ListPaymentMethods::class)->name('payment-methods.index');
-
-    // Auditoría (Solo Admin)
-    Route::get('/audit-logs', \App\Livewire\Audit\ListAuditLogs::class)->name('audit.index');
-
     // Órdenes de Servicio
     Route::get('/service-orders', \App\Livewire\ServiceOrders\ListServiceOrders::class)->name('service-orders.index');
 
     // Venta
     Route::get('/venta', \App\Livewire\Venta::class)->name('venta.index');
+
+    // Rutas restringidas a Administrador y Encargado
+    Route::middleware(['access:Administrador,Encargado'])->group(function() {
+        // Configuración de Métodos de Pago
+        Route::get('/manage-payment-methods', ListPaymentMethods::class)->name('payment-methods.index');
+    });
+
+    // Rutas restringidas SOLO a Administrador
+    Route::middleware(['access:Administrador'])->group(function() {
+        // Administración de Usuarios
+        Route::get('/manage-users', ListUser::class)->name('users.index');
+        // Auditoría
+        Route::get('/audit-logs', \App\Livewire\Audit\ListAuditLogs::class)->name('audit.index');
+    });
 });
 
 // Recuperación de Contraseña por Preguntas de Seguridad

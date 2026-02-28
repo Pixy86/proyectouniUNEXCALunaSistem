@@ -179,49 +179,6 @@
 
         <flux:separator variant="subtle" />
         
-        @if(in_array(auth()->user()->role, ['Administrador', 'Encargado']))
-            <!-- Mantenimiento del Sistema -->
-            <section>
-                <flux:heading class="text-red-500">{{ __('Mantenimiento del Sistema') }}</flux:heading>
-                <flux:subheading>{{ __('Acciones críticas de administración. Ten cuidado, estas acciones son irreversibles.') }}</flux:subheading>
-
-                <div class="mt-6 p-4 bg-red-50 dark:bg-red-950/20 rounded-xl border border-red-200 dark:border-red-900/50">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div>
-                            <flux:text class="font-semibold text-red-800 dark:text-red-400">{{ __('Reiniciar Datos Transaccionales') }}</flux:text>
-                            <flux:text size="sm" class="text-red-700 dark:text-red-500/80">
-                                {{ __('Elimina todas las ventas, órdenes de servicio, auditoría, servicios e inventario. Solo se mantienen los usuarios, clientes y vehículos.') }}
-                            </flux:text>
-                        </div>
-                        
-                        <flux:modal.trigger name="confirm-system-reset">
-                            <flux:button variant="danger" size="sm">{{ __('Reiniciar Sistema') }}</flux:button>
-                        </flux:modal.trigger>
-                    </div>
-                </div>
-
-                <flux:modal name="confirm-system-reset" variant="filled" class="max-w-md">
-                    <div class="space-y-6">
-                        <div>
-                            <flux:heading size="lg">{{ __('¿Estás absolutamente seguro?') }}</flux:heading>
-                            <flux:subheading>
-                                {{ __('Esta acción eliminará permanentemente todos los datos de ventas, inventario y órdenes. No se puede deshacer.') }}
-                            </flux:subheading>
-                        </div>
-
-                        <div class="flex gap-3 justify-end">
-                            <flux:modal.close>
-                                <flux:button variant="ghost">{{ __('Cancelar') }}</flux:button>
-                            </flux:modal.close>
-
-                            <flux:button wire:click="resetSystem" variant="danger">{{ __('Sí, borrar todo') }}</flux:button>
-                        </div>
-                    </div>
-                </flux:modal>
-            </section>
-
-            <flux:separator variant="subtle" />
-        @endif
 
         <!-- Eliminar Cuenta -->
         <livewire:settings.delete-user-form />

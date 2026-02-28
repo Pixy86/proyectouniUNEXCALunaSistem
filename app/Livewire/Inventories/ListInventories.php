@@ -147,12 +147,17 @@ class ListInventories extends Component implements HasActions, HasSchemas, HasTa
                     ->tooltip('Editar Producto')
                     ->iconButton()
                     ->size('lg')
-                    ->after(function (Inventory $record) {
+                    ->before(function (Inventory $record, \Closure $set) use (&$oldInventoryData) {
+                        $oldInventoryData = $record->toArray();
+                    })
+                    ->after(function (Inventory $record) use (&$oldInventoryData) {
                         \App\Models\AuditLog::registrar(
                             accion: \App\Models\AuditLog::ACCION_UPDATE,
                             descripcion: "Producto de inventario '{$record->nombreProducto}' actualizado",
                             modelo: 'Inventory',
-                            modeloId: $record->id
+                            modeloId: $record->id,
+                            datosAnteriores: $oldInventoryData ?? [],
+                            datosNuevos: $record->fresh()->toArray()
                         );
                         Notification::make()
                             ->title('Producto Actualizado')

@@ -57,38 +57,64 @@ class AuditLog extends Model
     ): self {
         // Si es una actualización y tenemos datos, generamos el detalle de cambios
         if ($accion === self::ACCION_UPDATE && !empty($datosAnteriores) && !empty($datosNuevos)) {
+            // Campos sensibles o irrelevantes que no se muestran en el diff
+            $ignoredFields = [
+                'updated_at', 'password', 'remember_token',
+                'two_factor_secret', 'two_factor_recovery_codes',
+                'plain_password_encrypted', 'security_answer_1',
+                'security_answer_2', 'security_answer_3',
+                'user_agent', 'ip_address',
+            ];
+
+            $fieldLabels = [
+                'nombre'            => 'Nombre',
+                'apellido'          => 'Apellido',
+                'name'              => 'Nombre',
+                'email'             => 'Email',
+                'telefono'          => 'Teléfono',
+                'telefono_secundario' => 'Teléfono Secundario',
+                'cedula_rif'        => 'Cédula/RIF',
+                'direccion'         => 'Dirección',
+                'precio'            => 'Precio',
+                'stockActual'       => 'Stock',
+                'estado'            => 'Estado',
+                'role'              => 'Cargo/Rol',
+                'status'            => 'Estatus',
+                'notes'             => 'Notas',
+                'descripcion'       => 'Descripción',
+                'nombreProducto'    => 'Nombre del Producto',
+                'customer_id'       => 'Cliente (ID)',
+                'vehicle_id'        => 'Vehículo (ID)',
+                'total_amount'      => 'Total',
+                'started_at'        => 'Fecha de Inicio',
+                'completed_at'      => 'Fecha de Completado',
+            ];
+
             $cambios = [];
             foreach ($datosNuevos as $key => $value) {
-                // Solo incluimos campos que realmente cambiaron y no son técnicos (como updated_at)
-                if (array_key_exists($key, $datosAnteriores) && 
-                    $datosAnteriores[$key] != $value && 
-                    !in_array($key, ['updated_at', 'password', 'remember_token'])) {
-                    
-                    $old = is_array($datosAnteriores[$key]) ? json_encode($datosAnteriores[$key]) : ($datosAnteriores[$key] ?? 'vacio');
-                    $new = is_array($value) ? json_encode($value) : ($value ?? 'vacio');
-                    
-                    // Traducir nombres de campos comunes para que el usuario entienda
-                    $label = match($key) {
-                        'nombre' => 'Nombre',
-                        'apellido' => 'Apellido',
-                        'email' => 'Email',
-                        'telefono' => 'Teléfono',
-                        'cedula_rif' => 'Cédula/RIF',
-                        'direccion' => 'Dirección',
-                        'precio' => 'Precio',
-                        'stockActual' => 'Stock',
-                        'estado' => 'Estado',
-                        'role' => 'Cargo',
-                        'status' => 'Estatus',
-                        default => $key
-                    };
+                if (in_array($key, $ignoredFields)) continue;
 
-                    $cambios[] = "{$label}: '{$old}' → '{$new}'";
-                }
+                if (!array_key_exists($key, $datosAnteriores)) continue;
+
+                $oldVal = $datosAnteriores[$key];
+                if ($oldVal == $value) continue;
+
+                $label = $fieldLabels[$key] ?? $key;
+
+                // Formatear booleanos a texto legible
+                $formatVal = function ($v) {
+                    if (is_bool($v) || $v === 0 || $v === 1 || $v === '0' || $v === '1') {
+                        return ((bool) $v) ? 'Activo' : 'Inactivo';
+                    }
+                    if (is_array($v)) return json_encode($v);
+                    return $v ?? 'vacío';
+                };
+
+                $cambios[] = "{$label}: '{$formatVal($oldVal)}' → '{$formatVal($value)}'";
             }
-            
+
             if (!empty($cambios)) {
-                $descripcion .= " | Cambios: " . implode(", ", $cambios);
+                $descripcion .= ' | Cambios: ' . implode(', ', $cambios);
             }
         }
 

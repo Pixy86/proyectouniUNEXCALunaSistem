@@ -349,6 +349,8 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
                             ->required(),
                     ])
                     ->action(function (ServiceOrder $record, array $data) {
+                        $oldData = $record->toArray();
+
                         $record->update([
                             'status' => ServiceOrder::STATUS_CANCELADA,
                             'notes' => $record->notes . "\n\nMOTIVO CANCELACIÓN: " . $data['cancel_reason'],
@@ -367,9 +369,11 @@ class ListServiceOrders extends Component implements HasActions, HasSchemas, Has
 
                         \App\Models\AuditLog::registrar(
                             accion: \App\Models\AuditLog::ACCION_UPDATE,
-                            descripcion: "Orden de servicio #{$record->id} cancelada (stock de inventario revertido)",
+                            descripcion: "Orden #{$record->id} cancelada. Motivo: {$data['cancel_reason']}",
                             modelo: 'ServiceOrder',
-                            modeloId: $record->id
+                            modeloId: $record->id,
+                            datosAnteriores: $oldData,
+                            datosNuevos: $record->fresh()->toArray()
                         );
                         Notification::make()
                             ->title('Orden Cancelada')
